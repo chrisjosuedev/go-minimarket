@@ -1,0 +1,27 @@
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    Agregar metodo de pago
+                </div>
+                <div class="card-body">
+                    <form action="/facturacion/metodopago/add" method="POST">
+                        <div class="form-group">
+                            <input type="text" onkeyup="javascript:this.value=this.value.toUpperCase();" class="form-control to-mayus" name="desc_modopago" placeholder="Metodo de Pago"
+                                autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success float-right">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            {{> list-metodo }}
+        </div>
+    </div>
+</div>

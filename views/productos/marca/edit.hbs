@@ -1,0 +1,24 @@
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-4 mx-auto">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    Editar marca de producto
+                </div>
+                <div class="card-body">
+                    <form action="/productos/marca/edit/{{marca.ID_MARCA}}" method="POST">
+                        <div class="form-group">
+                            <input type="text" onkeyup="javascript:this.value=this.value.toUpperCase();" class="form-control to-mayus" name="nombre_marca" value="{{marca.NOMBRE_MARCA}}" placeholder="Marca del Producto"
+                                autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success float-right">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

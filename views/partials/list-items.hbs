@@ -1,0 +1,54 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Ítem</th>
+            <th scope="col">Stock</th>
+            <th scope="col">Precio Unit.</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Marca</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+    {{#each productos}}
+        <tr>
+            <td>
+                {{ID_PRODUCTOS}}
+            </td>
+            <td>
+                {{NOMBRE_PRODUCTOS}}
+            </td>
+            <td>
+                {{STOCK}}
+            </td>
+            <td>
+                {{PRECIO_UNIT}}
+            </td>
+            <td>
+                {{NOMBRE_TIPOPRODUCTO}}
+            </td>
+            <td>
+                {{NOMBRE_MARCA}}
+            </td>
+            <td class="text-right">
+                <a href="/productos/edit/{{ID_PRODUCTOS}}" class="btn btn-primary">
+                    <i class="fas fa-pen"></i>
+                </a>
+                <a href="/productos/delete/{{ID_PRODUCTOS}}" class="btn btn-danger">
+                    <i class="fa fa-trash"></i>
+                </a>
+            </td>
+        </tr>
+        {{else}}
+            <div class="col-md-12 mb-4 mx-auto">
+                <div class="card card-body text-center">
+                    <p class="mt-3"> No existen productos </p>
+                </div>
+            </div>
+    {{/each}}
+    </tbody>
+</table>
+
+
+

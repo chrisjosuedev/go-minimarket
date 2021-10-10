@@ -1,0 +1,24 @@
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-4 mx-auto">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    Editar tipo de productos
+                </div>
+                <div class="card-body">
+                    <form action="/productos/tipo/edit/{{tiposproductos.ID_TIPOPRODUCTO}}" method="POST">
+                        <div class="form-group">
+                            <input type="text" onkeyup="javascript:this.value=this.value.toUpperCase();" class="form-control to-mayus" name="nombre_tipoproducto" value="{{tiposproductos.NOMBRE_TIPOPRODUCTO}}" placeholder="Nombre del Producto" autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success float-right">
+                                <i class="fas fa-save"></i> Editar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

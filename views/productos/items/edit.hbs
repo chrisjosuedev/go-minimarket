@@ -1,0 +1,77 @@
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    Editar Ítem
+                </div>
+                <div class="card-body">
+                    <form action="/productos/edit/{{productos.ID_PRODUCTOS}}" method="POST">
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
+                                <input type="text" onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                    class="form-control to-mayus" name="nombre_productos"
+                                    placeholder="Nombre del Producto" value="{{productos.NOMBRE_PRODUCTOS}}" autofocus>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <input type="number" min="0" step="0.01" class="form-control" name="precio_unit"
+                                    value="{{productos.PRECIO_UNIT}}" placeholder="Precio">
+                            </div>
+                            <!--<div class="form-group col-md-4">
+                                <input type="number" class="form-control" min="0"
+                                    onkeydown="if(event.key==='.'){event.preventDefault();}" placeholder="Stock">
+                            </div>-->
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-6">
+                                <select id="marca" name="id_marca" class="custom-select">
+                                    <option selected> - Seleccione marca del producto - </option>
+                                    {{> options/select-marca }}
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6" id="tipo">
+                                <select id="tipo-pro" name="id_tipoproducto" class="custom-select">
+                                    <option selected> - Seleccione tipo del producto - </option>
+                                    {{> options/select-tipo }}
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success float-right">
+                            <i class="fas fa-save"></i> Editar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+    // Select Marca
+    const marcaItem = `{{productos.ID_MARCA}}`
+    const marcaSelect = this.document.getElementById('marca')
+
+    for (i = 0; i < marcaSelect.length; i++) {
+        if (marcaSelect[i].value === marcaItem) {
+            marcaSelect.selectedIndex = i
+        }
+    }
+
+    // Select Tipo de Producto
+    const tipoItem = `{{productos.ID_TIPOPRODUCTO}}`
+    const tipoSelect = this.document.getElementById('tipo-pro')
+
+    for (j = 0; j < tipoSelect.length; j++) {
+        if (tipoSelect[j].value === tipoItem) {
+            tipoSelect.selectedIndex = j
+        }
+    }
+
+</script>

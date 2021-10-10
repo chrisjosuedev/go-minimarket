@@ -1,0 +1,38 @@
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    Agregar proveedor
+                </div>
+                <div class="card-body">
+                    <form action="/productos/proveedores/add" method="POST">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="id_proveedor" placeholder="R.T.N."
+                                autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="nombre_proveedor" placeholder="Proveedor"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" class="form-control" name="email_proveedor" placeholder="Email"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="cel_proveedor" placeholder="Celular" required>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success float-right">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            {{> list-proveedores }}
+        </div>
+    </div>
+</div>

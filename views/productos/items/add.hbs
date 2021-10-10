@@ -1,0 +1,56 @@
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    Agregar Ítem
+                </div>
+                <div class="card-body">
+                    <form action="/productos/add" method="POST">
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
+                                <input type="text" onkeyup="javascript:this.value=this.value.toUpperCase();" class="form-control to-mayus" name="nombre_productos" placeholder="Nombre del Producto" autofocus>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <input type="number" min="0" step="0.01" class="form-control" name="precio_unit" placeholder="Precio">
+                            </div>
+                            <!--<div class="form-group col-md-4">
+                                <input type="number" class="form-control" min="0"
+                                    onkeydown="if(event.key==='.'){event.preventDefault();}" placeholder="Stock">
+                            </div>-->
+                        </div>
+
+                        <div class="form-row">
+                            
+                            <div class="form-group col-md-6">
+                                <select id="inputState sel-tipo" name="id_marca" class="custom-select">
+                                    <option selected> - Seleccione marca del producto - </option>
+                                    {{> options/select-marca }}
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6" id="tipo">
+                                <select id="inputState sel-tipo" name="id_tipoproducto" class="custom-select">
+                                    <option selected> - Seleccione tipo del producto - </option>
+                                    {{> options/select-tipo }}
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success float-right">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-md-12 mt-5">
+        <div>
+            {{> list-items }}
+        </div>
+    </div>
+
+</div>

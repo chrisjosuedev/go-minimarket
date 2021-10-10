@@ -1,0 +1,53 @@
+<script type="text/javascript">
+    // Check Sexo Cliente
+    const sexoPerson = `{{persona.SEXO}}`
+    const radioMale = this.document.getElementById('male')
+    const radioFemale = this.document.getElementById('female')
+
+    if (sexoPerson === '1') {
+        radioFemale.checked = true
+    }
+    else {
+        radioMale.checked = true
+    }
+
+    // Select Depto
+
+    const deptoPerson = `{{persona.ID_DEPTO}}`
+    const deptoSelect = this.document.getElementById('depto')
+    const ciudadSelect = this.document.getElementById('ciudad')
+
+
+    for (j = 0; j < deptoSelect.length; j++) {
+        if (deptoSelect[j].value === deptoPerson) {
+            deptoSelect.selectedIndex = j
+        }
+    }
+
+    const cityDeptoCode = this.document.getElementsByClassName(deptoPerson)
+
+    const ciudadPerson = `{{persona.ID_CIUDAD}}`
+    var cityArr = []
+    var cityVal = []
+
+
+    for (c = 0; c < cityDeptoCode.length; c++) {
+        if (cityDeptoCode[c].className === deptoPerson) {
+            cityArr.push(cityDeptoCode[c].textContent)
+            cityVal.push(cityDeptoCode[c].value)
+        }
+    }
+    let temp = ''
+
+    for (x = 0; x < cityArr.length; x++) {
+        temp = temp + "<option value=" + cityVal[x] + ">" + cityArr[x] + "</option>"
+    }
+
+    ciudadSelect.innerHTML = temp
+
+    for (y = 0; y < ciudadSelect.length; y++) {
+        if (ciudadSelect[y].value === ciudadPerson) {
+            ciudadSelect.selectedIndex = y
+        }
+    }
+</script>

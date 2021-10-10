@@ -1,0 +1,28 @@
+<div class="row">
+    {{#each tipos_producto}}
+
+    <div class="col-md-4">
+        <div class="card border-dark mb-3">
+            <div class="card-header">
+                <strong class="mr-2"> Código: </strong> {{ID_TIPOPRODUCTO}}
+            </div>
+            <div class="card-body">
+                <h5 class="pb-2"> {{NOMBRE_TIPOPRODUCTO}} </h5>
+                <div class="text-right">
+                    <a href="/productos/tipo/delete/{{ID_TIPOPRODUCTO}}" class="btn btn-danger btn-sm"> Eliminar </a>
+                    <a href="/productos/tipo/edit/{{ID_TIPOPRODUCTO}}" class="btn btn-secondary btn-sm"> Editar </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    {{else}}
+    <div class="col-md-8 mx-auto">
+        <div class="card card-body text-center">
+            <p class="mt-3"> No existen tipos de producto </p>
+        </div>
+    </div>
+    {{/each}}
+</div>

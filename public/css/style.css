@@ -1,0 +1,15 @@
+* {
+    font-family: 'Inter';
+}
+
+.btn, .logo {
+    font-weight: 600;
+}
+
+.prove-style {
+    font-size: 1rem;
+}
+
+.to-mayus {
+    text-transform: uppercase; 
+}

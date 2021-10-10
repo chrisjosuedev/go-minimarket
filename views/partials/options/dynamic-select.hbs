@@ -1,0 +1,37 @@
+<script type="text/javascript">
+
+    const depto = this.document.getElementById('depto')
+
+    depto.onchange = function departament() {
+
+        /* Update Select */
+        var updateCitySelect = `{{> options/select-ciudad }}`
+        document.getElementById('ciudad').innerHTML = updateCitySelect
+
+        const city = document.getElementsByClassName(depto.value)
+        var arr = []
+        var val = []
+
+        if (depto.selectedIndex === 0) {
+            arr.push(" - Seleccione Ciudad - ")
+            val.push("0")
+        }
+        else {
+            var d = 0
+            while (d < city.length) {
+                if (city[d].className === depto.value) {
+                    arr.push(city[d].textContent)
+                    val.push(city[d].value)
+                }
+                d++
+            }
+        }
+
+        let string = ''
+
+        for (j = 0; j < arr.length; j++) {
+            string = string + "<option value=" + val[j] + ">" + arr[j] + "</option>"
+        }
+        document.getElementById('ciudad').innerHTML = string
+    }
+</script>
