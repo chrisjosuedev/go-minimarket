@@ -27,7 +27,10 @@ router.post("/add", async (req, res) => {
     id_marca,
     id_tipoproducto,
   };
+
+  
   await pool.query("INSERT INTO productos set ?", [newProducto]);
+
   req.flash("success", "Producto Agregado Correctamente");
   res.redirect("/productos/add");
 });

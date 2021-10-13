@@ -6,23 +6,23 @@
                     <i class="fas fa-cart-plus"></i> NUEVA COMPRA
                 </div>
                 <div class="card-body">
-                    <form>
+                    <form action="/facturacion/compra" method="POST">
                         <label>Datos Proveedor </label>
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <select id="inputState sel-tipo" class="custom-select">
+                                <select id="proveedor-tipo" name="id_proveedor" class="custom-select">
                                     <option selected> - Proveedor - </option>
-                                    {{!--{{> options/select-marca }}--}}
+                                    {{> options/select-proveedor }}
                                 </select>
-                                <button type="button" class="btn btn-success float-right mt-2 ml-2">
+                                <a href="/productos/proveedores/add" class="btn btn-success float-right mt-2 ml-2">
                                     <i class="far fa-address-card"></i> Nuevo
-                                </button>
+                                </a>
                             </div>
                             <div class="form-group col-md-4">
-                                <input type="text" class="form-control" placeholder="Email" disabled>
+                                <input type="text" class="form-control" id="email-pro" placeholder="Email" disabled>
                             </div>
                             <div class="form-group col-md-4">
-                                <input type="text" class="form-control" placeholder="Celular" disabled>
+                                <input type="text" class="form-control" id="cel-pro" placeholder="Celular" disabled>
                             </div>
                         </div>
 
@@ -32,28 +32,31 @@
                         <div class="form-row">
 
                             <div class="form-group col-md-4">
-                                <select id="inputState sel-tipo" class="custom-select">
+                                <select id="producto-tipo" class="custom-select">
                                     <option selected> - Productos - </option>
-                                    {{!--{{> options/select-marca }}--}}
+                                    {{> options/select-productos }}
                                 </select>
                             </div>
 
                             <div class="form-group col-md-4">
-                                <input type="number" class="form-control" min="1"
+                                <input type="number" class="form-control" id="cantidad-compra" min="1"
                                     onkeydown="if(event.key==='.'){event.preventDefault();}" placeholder="Cantidad"
                                     required>
                             </div>
+
+                            <div class="form-group col-md-4">
+                                <input type="number" class="form-control" id="precio-compra" min="0" step="0.01"
+                                    placeholder="Precio Compra" required>
+                            </div>
                         </div>
-
-
 
                         <!-- Boton Save -->
 
-                        <button type="button" class="btn btn-success float-right mb-4 mr-2">
+                        <button type="submit" class="btn btn-success float-right mb-4 mr-2">
                             <i class="fas fa-file-invoice"></i> Procesar
                         </button>
 
-                        <button type="submit" class="btn btn-success float-right mb-4 mr-2">
+                        <button type="button" id="btn-agregar" class="btn btn-success float-right mb-4 mr-2">
                             <i class="far fa-plus-square"></i> Agregar Producto
                         </button>
                         <div class="col-md-12 mt-5">
@@ -62,9 +65,12 @@
                     </form>
 
                     <div class="form-group col-md-2 float-right">
-                        <input type="text" class="form-control" placeholder="Subtotal" disabled>
-                        <input type="text" class="form-control mt-2" placeholder="ISV" disabled>
-                        <input type="text" class="form-control mt-2" placeholder="Total" disabled>
+                        <label> Subtotal</label>
+                        <input type="text" id="st-compra" class="form-control" placeholder="Subtotal" disabled>
+                        <label class="mt-2"> ISV</label>
+                        <input type="text" id="isv" class="form-control " placeholder="ISV" disabled>
+                        <label class="mt-2"> Total </label>
+                        <input type="text" id="total" class="form-control" placeholder="Total" disabled>
                     </div>
                 </div>
             </div>
@@ -72,3 +78,102 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    const emailText = this.document.getElementById('email-pro')
+    const celText = this.document.getElementById('cel-pro')
+
+    const proSel = this.document.getElementById('proveedor-tipo')
+
+    const productoSel = this.document.getElementById('producto-tipo')
+
+    // Totales
+    const stCompra = this.document.getElementById('st-compra')
+    const isvCompra = this.document.getElementById('isv')
+    const totalCompra = this.document.getElementById('total')
+
+    //var valueProducto = 0
+
+    proSel.onchange = function dataProveedores() {
+
+        const opValue = document.getElementsByClassName('opt-pro')
+
+        const selectItem = proSel.selectedIndex
+
+        if (selectItem === 0) {
+            celText.value = "Celular"
+            emailText.value = "Email"
+        }
+        else {
+            celText.value = opValue[selectItem - 1].classList[1]
+            emailText.value = opValue[selectItem - 1].classList[2]
+        }
+    }
+
+    // Productos
+    var idProd = 0
+    var descProd = ""
+
+    productoSel.onchange = function dataProductos() {
+        idProd = productoSel.value
+        descProd = productoSel.options[productoSel.selectedIndex].text
+    }
+
+
+    // Boton Agregar a Tabla
+
+    const btnAgregar = this.document.getElementById('btn-agregar')
+    var key = 1;
+    var subtotal = 0
+    var total = 0
+    var isv = 0
+
+    // Tabla e Inputs
+    const tableCompra = document.getElementById('table-compra')
+    const amountCompra = document.getElementById('cantidad-compra')
+    const priceCompra = document.getElementById('precio-compra')
+
+    btnAgregar.onclick = tableProducto
+
+    function removeItem(key) {
+        document.getElementById(key).remove()
+    }
+
+    function tableProducto() {
+        const row = tableCompra.insertRow()
+        row.setAttribute('id', key++);
+        var st = parseInt(amountCompra.value) * parseFloat(priceCompra.value)
+        subtotal = subtotal + st
+        isv = subtotal * 0.15
+        total = subtotal + isv
+        row.innerHTML = `
+            <td> ${idProd} <input type="number" name="id_productos" value="${idProd}" hidden/> </td>
+            <td> ${descProd} </td>
+            <td> ${amountCompra.value} <input type="number" name="cantidad" value="${amountCompra.value}" hidden/> </td>
+            <td> ${priceCompra.value} <input type="number" name="precio_compra" value="${priceCompra.value}" hidden/> </td>
+            <td> ${st.toFixed(2)} </td>
+            <td> </td>
+        `
+
+        const removeBtn = document.createElement('button')
+        removeBtn.classList.add('btn', 'btn-danger')
+        removeBtn.innerHTML = `<i class="fa fa-trash"></i>`
+        row.children[5].appendChild(removeBtn)
+
+        stCompra.value = subtotal.toFixed(2)
+        isvCompra.value = isv.toFixed(2)
+        totalCompra.value = total.toFixed(2)
+
+        removeBtn.onclick = function () {
+            removeItem(row.getAttribute('id'))
+            subtotal = subtotal - st
+            isv = subtotal * 0.15
+            total = subtotal + isv
+            stCompra.value = subtotal.toFixed(2)
+            isvCompra.value = isv.toFixed(2)
+            totalCompra.value = total.toFixed(2)
+        }
+
+    }
+
+</script>

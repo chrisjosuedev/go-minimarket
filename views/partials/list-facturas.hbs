@@ -1,0 +1,35 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">N° Factura</th>
+            <th scope="col">Cliente</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Modo Pago</th>
+
+        </tr>
+    </thead>
+    <tbody>
+    {{#each ventas}}
+        <tr>
+            <td>
+                {{ID_FACTURA}}
+            </td>
+            <td>
+                {{NOMBRE_PERSONA}} {{APELLIDO_PERSONA}}
+            </td>
+            <td>
+                {{format FECHA}}
+            </td>
+            <td>
+                {{DESC_MODOPAGO}}
+            </td>
+        </tr>
+        {{else}}
+            <div class="col-md-12 mb-4 mx-auto">
+                <div class="card card-body text-center">
+                    <p class="mt-3"> No existen ventas </p>
+                </div>
+            </div>
+    {{/each}}
+    </tbody>
+</table>
