@@ -94,7 +94,6 @@ router.get("/ventas/transacciones", async (req, res) => {
   res.render("facturacion/factura/list", { ventas });
 });
 
-
 // -> /facturacion/metodopago
 
 router.get("/metodopago/add", async (req, res) => {
@@ -175,7 +174,7 @@ router.post("/compra", async (req, res) => {
   let idprod = Object.values(id_productos);
   let amount = Object.values(cantidad);
   let price = Object.values(precio_compra);
-  
+
   // Nueva Compra
   const newCompra = {
     id_proveedor,
@@ -205,7 +204,6 @@ router.post("/compra", async (req, res) => {
     ]);
   }
 
-  
   // Actualizar StocK
 
   const updateStockQuery = `UPDATE productos set STOCK = (STOCK + ?) 
@@ -218,6 +216,79 @@ router.post("/compra", async (req, res) => {
   // Mensaje Final y Redireccionamiento
   req.flash("success", "Compra Agregada Correctamente");
   res.redirect("/facturacion/compra");
+});
+
+// Ruta de Busquedas en Facturacion
+router.get("/consultas/ventas", async (req, res) => {
+  const empQuery = `SELECT ID_EMPLEADO, ID_CATEGORIA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA 
+                    FROM empleado 
+                    INNER JOIN persona ON empleado.ID_PERSONA = persona.ID_PERSONA 
+                    HAVING ID_CATEGORIA = 1 OR ID_CATEGORIA = 3`;
+  const empleados = await pool.query(empQuery);
+  const clientes = await pool.query("SELECT * FROM persona");
+  const metodopago = await pool.query("SELECT * FROM modo_pago");
+  res.render("facturacion/factura/byventas", {
+    empleados,
+    clientes,
+    metodopago,
+  });
+});
+
+// CONSULTAS ESPECIFICAS
+// Ventas realizadas por Cliente
+router.get("/consultas/ventas/cliente/:id_persona", async (req, res) => {
+  const { id_persona } = req.params;
+  // Busqueda Cliente
+  const cliQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT) as TOTAL
+                        FROM factura_detalle
+                        INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
+                        INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
+                        INNER JOIN modo_pago ON modo_pago.ID_MODOPAGO = factura.ID_MODOPAGO
+                        WHERE persona.ID_PERSONA = ?
+                        GROUP BY factura.ID_FACTURA
+                        ORDER BY factura.ID_FACTURA ASC`;
+  const clienteFact = await pool.query(cliQuerybyId, [id_persona]);
+  const jsonCliente = Object.values(JSON.parse(JSON.stringify(clienteFact)))
+  res.json(jsonCliente);
+});
+
+// Ventas Realizadas por Empleado
+router.get("/consultas/ventas/empleado/:id", async (req, res) => {
+  const { id } = req.params;
+  // Busqueda Cliente
+  const empQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT) as TOTAL
+                        FROM factura_detalle
+                        INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
+                        INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
+                        INNER JOIN modo_pago ON modo_pago.ID_MODOPAGO = factura.ID_MODOPAGO
+                        WHERE factura.ID_EMPLEADO = ?
+                        GROUP BY factura.ID_FACTURA
+                        ORDER BY factura.ID_FACTURA ASC`;
+  const empleadoFact = await pool.query(empQuerybyId, [id]);
+  const jsonEmpleado = Object.values(JSON.parse(JSON.stringify(empleadoFact)))
+  res.json(jsonEmpleado);
+});
+
+// Ventas Realiadas por Metodo de Pago
+router.get("/consultas/ventas/modopago/:cod", async (req, res) => {
+  const { cod } = req.params;
+  // Busqueda Cliente
+  const paymentQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT) as TOTAL
+                        FROM factura_detalle
+                        INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
+                        INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
+                        INNER JOIN modo_pago ON modo_pago.ID_MODOPAGO = factura.ID_MODOPAGO
+                        WHERE factura.ID_MODOPAGO = ?
+                        GROUP BY factura.ID_FACTURA
+                        ORDER BY factura.ID_FACTURA ASC`;
+  const paymentFact = await pool.query(paymentQuerybyId, [cod]);
+  const jsonPayment = Object.values(JSON.parse(JSON.stringify(paymentFact)))
+  res.json(jsonPayment);
+});
+
+// Ruta de Busquedas en Compras
+router.get("/consultas/compras", async (req, res) => {
+  res.render("facturacion/factura/bycompras");
 });
 
 module.exports = router;

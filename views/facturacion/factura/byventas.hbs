@@ -1,0 +1,234 @@
+<div class="container p-4">
+    <div class="alert alert-danger d-none" role="alert" id="alert">
+        A simple danger alert—check it out!
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    <i class="far fa-question-circle"></i> TOTAL EN VENTAS REALIZADAS
+                </div>
+                <div class="card-body">
+                    <!--action="/facturacion/consultas/ventas" method="POST"-->
+                    <form id="ventas-total">
+                        <label> Busqueda por </label>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <select id="tipo-bus" class="custom-select">
+                                    <option selected> - Opción - </option>
+                                    <option> Compras de Cliente </option>
+                                    <option> Ventas de Empleado </option>
+                                    <option> Método de Pago </option>
+                                </select>
+                            </div>
+                            <!-- d-none-->
+                            <div class="form-group col-md-4 d-none" id="id-cliente">
+                                <input id="id-cli" type="text" name="id_persona" class="form-control" placeholder="Identidad">
+                            </div>
+                            <div class="form-group col-md-4 d-none" id="list-empleado">
+                                <select id="id_emp" name="id_empleado" class="custom-select">
+                                    <option selected value="0"> - Empleado atendió - </option>
+                                    {{> options/select-empleados }}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4 d-none" id="list-cliente">
+                                <select name="id_nombre_persona" class="custom-select">
+                                    <option selected value="0"> - Cliente - </option>
+                                    {{> options/select-clientes }}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4 d-none" id="list-modo">
+                                <select id="id_modo" name="id_modopago" class="custom-select">
+                                    <option selected value="0"> - Metodo de Pago - </option>
+                                    {{> options/select-metodopago }}
+                                </select>
+                            </div>
+                            <button type="button" id="btn-agregar" class="btn btn-success float-right mb-4 mr-2">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-row mx-0 d-none" id="customSearch">
+
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="custom-id" name="customRadio" class="custom-control-input">
+                                    <label class="custom-control-label" for="custom-id">Identidad</label>
+                                </div>
+                                <div class="custom-control custom-radio ml-2">
+                                    <input type="radio" id="custom-name" name="customRadio"
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="custom-name">Nombre</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Resultados -->
+                <div class="col-md-12">
+                    <table class="table table-striped" id="table-total-ventas">
+                        <thead>
+                            <th scope="col">N° Factura</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Modo Pago</th>
+                            <th scope="col">Total</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+
+    // Con JQuery
+
+    $(function () {
+        $('#btn-agregar').on('click', function () {
+
+            // Verificacion de Elemento
+            // Elemento Select General
+            var generalOptions = $('#tipo-bus option:selected')
+
+            // Elementos Form con JQuery
+            var clientInput = $('#id-cli')
+            var clienteSelect = $('#list-cliente option')
+            var empleadoSelect = $('#id_emp option')
+            var pagoSelect = $('#id_modo option')
+
+            var idRadioButton = $('#custom-id')
+            var nameRadioButton = $('#custom-name')
+
+            var id = ''
+            var ruta = ''
+
+            if (generalOptions.index() === 0) {
+                console.log("Ninguna opción esta seleccionada")
+                ruta = ''
+            }
+            else if (generalOptions.index() === 1) {
+                if (!idRadioButton.is(':checked') && !nameRadioButton.is(':checked')) {
+                    console.log("Ninguno esta seleccionado")
+                    ruta = ''
+                }
+                else if (idRadioButton.is(':checked')) {
+                    id = clientInput.val()
+                    ruta = '/cliente/' + id
+                }
+                else {
+                    id = clienteSelect.filter(':selected').val()
+                    ruta = '/cliente/' + id
+                }
+            }
+            else if (generalOptions.index() === 2) {
+                id = empleadoSelect.filter(':selected').val()
+                ruta = '/empleado/' + id
+            }
+            else {
+                id = pagoSelect.filter(':selected').val()
+                ruta = '/modopago/' + id
+            }
+
+            $.ajax({
+                url: '/facturacion/consultas/ventas' + ruta,
+                success: function (ventas) {
+                    let tbody = $('tbody')
+
+                    tbody.html('')
+
+                    ventas.forEach(ventas => {
+
+                        // Fecha format
+                        var fecha = new Date(ventas.FECHA)
+                        var dd = String(fecha.getDate()).padStart(2, '0');
+                        var mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                        var yyyy = fecha.getFullYear();
+
+                        fecha = dd + '/' + mm + '/' + yyyy
+
+                        tbody.append(`
+                            <tr>
+                                <td> ${ventas.ID_FACTURA} </td>
+                                <td> ${ventas.NOMBRE_PERSONA} ${ventas.APELLIDO_PERSONA} </td>
+                                <td> ${fecha}  </td>
+                                <td> ${ventas.DESC_MODOPAGO} </td>
+                                <td> ${ventas.TOTAL} </td>
+                            </tr>
+                        `)
+                    })
+                }
+            })
+        })
+    })
+
+
+    // DOM Normal
+    const selOption = this.document.getElementById('tipo-bus')
+
+    // Radio Buttons de Cliente
+    const byNombre = this.document.getElementById('custom-name')
+    const byIdentidad = this.document.getElementById('custom-id')
+
+
+    const customCliente = this.document.getElementById('customSearch')
+    const listEmp = this.document.getElementById('list-empleado')
+    const listCli = this.document.getElementById('list-cliente')
+    const listMode = this.document.getElementById('list-modo')
+    const idCliente = this.document.getElementById('id-cliente')
+
+    selOption.onchange = () => {
+
+        if (selOption.selectedIndex === 1) {
+            customCliente.classList.remove('d-none')
+
+            listMode.classList.add('d-none')
+            listEmp.classList.add('d-none')
+        }
+
+        else if (selOption.selectedIndex === 2) {
+            listEmp.classList.remove('d-none')
+
+            listMode.classList.add('d-none')
+            customCliente.classList.add('d-none')
+            listCli.classList.add('d-none')
+            idCliente.classList.add('d-none')
+        }
+
+        else if (selOption.selectedIndex === 3) {
+            listMode.classList.remove('d-none')
+
+            customCliente.classList.add('d-none')
+            listCli.classList.add('d-none')
+            listEmp.classList.add('d-none')
+            idCliente.classList.add('d-none')
+        }
+        else {
+            listMode.classList.add('d-none')
+            listEmp.classList.add('d-none')
+            customCliente.classList.add('d-none')
+            listCli.classList.add('d-none')
+            idCliente.classList.add('d-none')
+        }
+    }
+
+    byIdentidad.onclick = () => {
+        idCliente.classList.remove('d-none')
+        listCli.classList.add('d-none')
+    }
+
+    byNombre.onclick = () => {
+        listCli.classList.remove('d-none')
+        idCliente.classList.add('d-none')
+    }
+
+
+</script>
