@@ -23,7 +23,8 @@
                             </div>
                             <!-- d-none-->
                             <div class="form-group col-md-4 d-none" id="id-cliente">
-                                <input id="id-cli" type="text" name="id_persona" class="form-control" placeholder="Identidad">
+                                <input id="id-cli" type="text" name="id_persona" class="form-control"
+                                    placeholder="Identidad">
                             </div>
                             <div class="form-group col-md-4 d-none" id="list-empleado">
                                 <select id="id_emp" name="id_empleado" class="custom-select">
@@ -62,6 +63,9 @@
                             </div>
                         </div>
                     </form>
+                    <div class="float-right">
+                        <a href="/analiticas/ventas"> Ver analiticas </a>
+                    </div>
                 </div>
 
                 <!-- Resultados -->
@@ -141,30 +145,44 @@
             $.ajax({
                 url: '/facturacion/consultas/ventas' + ruta,
                 success: function (ventas) {
-                    let tbody = $('tbody')
+                    var tbody = $('tbody')
 
-                    tbody.html('')
 
-                    ventas.forEach(ventas => {
+                    if (ventas.length === 0) {
+                        tbody.html('')
+                        let noRows = $('#alert')
+                        noRows.text("No hay ventas procesadas para dicho registro")
+                        noRows.removeClass('d-none')
 
-                        // Fecha format
-                        var fecha = new Date(ventas.FECHA)
-                        var dd = String(fecha.getDate()).padStart(2, '0');
-                        var mm = String(fecha.getMonth() + 1).padStart(2, '0');
-                        var yyyy = fecha.getFullYear();
+                        setTimeout(function () {
+                            noRows.addClass('d-none')
+                        }, 5000);
+                    }
+                    else {
 
-                        fecha = dd + '/' + mm + '/' + yyyy
+                        tbody.html('')
 
-                        tbody.append(`
+                        ventas.forEach(ventas => {
+
+                            // Fecha format
+                            var fecha = new Date(ventas.FECHA)
+                            var dd = String(fecha.getDate()).padStart(2, '0');
+                            var mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                            var yyyy = fecha.getFullYear();
+
+                            fecha = dd + '/' + mm + '/' + yyyy
+
+                            tbody.append(`
                             <tr>
                                 <td> ${ventas.ID_FACTURA} </td>
                                 <td> ${ventas.NOMBRE_PERSONA} ${ventas.APELLIDO_PERSONA} </td>
                                 <td> ${fecha}  </td>
                                 <td> ${ventas.DESC_MODOPAGO} </td>
-                                <td> ${ventas.TOTAL} </td>
+                                <td> L. ${ventas.TOTAL} </td>
                             </tr>
                         `)
-                    })
+                        })
+                    }
                 }
             })
         })

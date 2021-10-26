@@ -52,6 +52,7 @@ app.use('/productos', require('./routes/productos'))
 app.use('/persona', require('./routes/persona'))
 app.use('/laboral', require('./routes/laboral'))
 app.use('/facturacion', require('./routes/facturacion'))
+app.use('/analiticas', require('./routes/analiticas'))
 
 // Public
 app.use(express.static(path.join(__dirname, 'public')));

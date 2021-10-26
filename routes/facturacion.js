@@ -248,7 +248,7 @@ router.get("/consultas/ventas/cliente/:id_persona", async (req, res) => {
                         GROUP BY factura.ID_FACTURA
                         ORDER BY factura.ID_FACTURA ASC`;
   const clienteFact = await pool.query(cliQuerybyId, [id_persona]);
-  const jsonCliente = Object.values(JSON.parse(JSON.stringify(clienteFact)))
+  const jsonCliente = Object.values(JSON.parse(JSON.stringify(clienteFact)));
   res.json(jsonCliente);
 });
 
@@ -265,7 +265,7 @@ router.get("/consultas/ventas/empleado/:id", async (req, res) => {
                         GROUP BY factura.ID_FACTURA
                         ORDER BY factura.ID_FACTURA ASC`;
   const empleadoFact = await pool.query(empQuerybyId, [id]);
-  const jsonEmpleado = Object.values(JSON.parse(JSON.stringify(empleadoFact)))
+  const jsonEmpleado = Object.values(JSON.parse(JSON.stringify(empleadoFact)));
   res.json(jsonEmpleado);
 });
 
@@ -282,13 +282,80 @@ router.get("/consultas/ventas/modopago/:cod", async (req, res) => {
                         GROUP BY factura.ID_FACTURA
                         ORDER BY factura.ID_FACTURA ASC`;
   const paymentFact = await pool.query(paymentQuerybyId, [cod]);
-  const jsonPayment = Object.values(JSON.parse(JSON.stringify(paymentFact)))
+  const jsonPayment = Object.values(JSON.parse(JSON.stringify(paymentFact)));
   res.json(jsonPayment);
 });
 
 // Ruta de Busquedas en Compras
 router.get("/consultas/compras", async (req, res) => {
-  res.render("facturacion/factura/bycompras");
+  const proveedores = await pool.query("SELECT * FROM proveedores");
+  res.render("facturacion/factura/bycompras", { proveedores });
+});
+
+// Compras realizadas por proveedor (Listado)
+router.get("/consultas/compras/proveedor/lista/:rtn/:order", async (req, res) => {
+    const { rtn, order } = req.params;
+    const proveedorQuerybyId = `SELECT compra_producto.*, proveedores.*, sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA) as TOTAL
+                                FROM compra_producto_detalle
+                                INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
+                                INNER JOIN proveedores ON compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR
+                                WHERE proveedores.ID_PROVEEDOR = ?
+                                GROUP BY compra_producto.ID_COMPRA`;
+    if (order === "desc") {
+      var orderby = ` ORDER BY TOTAL DESC`;
+    } 
+    else {
+      var orderby = ` ORDER BY TOTAL ASC`;
+    }
+
+    const comprabyID = proveedorQuerybyId + orderby
+
+    const proveedorFact = await pool.query(comprabyID, [rtn]);
+    const jsonProveedor = Object.values(JSON.parse(JSON.stringify(proveedorFact)));
+    res.json(jsonProveedor);
+  }
+);
+
+// Compra realizadas por proveedores (Rango de Fecha)
+router.get("/consultas/compras/proveedor/lista/:rtn/:order/:fechain/:fechaout", async (req, res) => {
+  const { rtn, order, fechain, fechaout } = req.params;
+  const dateFilter = `SELECT compra_producto.*, proveedores.*, sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA) as TOTAL
+                      FROM compra_producto_detalle
+                      INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
+                      INNER JOIN proveedores ON compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR
+                      WHERE compra_producto.id_proveedor = ? and compra_producto.FECHA BETWEEN ? AND ?
+                      GROUP BY compra_producto.ID_COMPRA`
+
+  if (order === "desc") {
+    var orderby = ` ORDER BY TOTAL DESC`;
+  } 
+  else {
+    var orderby = ` ORDER BY TOTAL ASC`;
+  }
+
+  const comprabyDate = dateFilter + orderby
+  
+  const proveedorFact = await pool.query(comprabyDate, [rtn, fechain, fechaout])
+  const jsonProveedor = Object.values(JSON.parse(JSON.stringify(proveedorFact)));
+
+  res.json(jsonProveedor);
+}
+);
+
+// Compras realizadas por proveedor (Total de Ventas)
+router.get("/consultas/compras/proveedor/total/:rtn", async (req, res) => {
+  const { rtn } = req.params;
+  const proveedorQuerybyId = `SELECT compra_producto.ID_COMPRA, compra_producto.ID_PROVEEDOR, proveedores.*, sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA) as TOTAL
+                              FROM compra_producto_detalle
+                              INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
+                              INNER JOIN proveedores ON compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR
+                              WHERE proveedores.ID_PROVEEDOR = ?`;
+  const proveedorFact = await pool.query(proveedorQuerybyId, [rtn]);
+  const jsonProveedor = Object.values(
+    JSON.parse(JSON.stringify(proveedorFact))
+  );
+
+  res.json(jsonProveedor);
 });
 
 module.exports = router;

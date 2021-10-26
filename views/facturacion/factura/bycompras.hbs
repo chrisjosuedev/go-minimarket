@@ -1,1 +1,293 @@
-<p> Compras </p>
+<div class="container p-4">
+    <div class="alert alert-danger d-none" role="alert" id="alert">
+        A simple danger alert—check it out!
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    <i class="far fa-question-circle"></i> TOTAL EN COMPRAS REALIZADAS
+                </div>
+                <div class="card-body">
+                    <form id="ventas-total">
+                        <label> Busqueda por </label>
+
+                        <div class="form-row">
+                            <!-- d-none-->
+                            <div class="form-group col-md-4 d-none">
+                                <input id="id-cli" type="text" name="id_persona" class="form-control"
+                                    placeholder="Identidad">
+                            </div>
+                            <div class="form-group col-md-4" id="list-proveedor">
+                                <select id="id_prov" name="id_empleado" class="custom-select">
+                                    <option selected value="0"> - Proveedor - </option>
+                                    {{> options/select-proveedor }}
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-2" id="cont-order-by">
+                                <select id="order-by" class="custom-select">
+                                    <option selected> - Filtrar Compra - </option>
+                                    <option> Mayor Compra </option>
+                                    <option> Menor Compra </option>
+                                </select>
+                            </div>
+                            <button type="button" id="btn-agregar" class="btn btn-success float-right mb-4 mr-2">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+
+                        </div>
+
+
+                        <div class="form-row d-none" id="rangeDate">
+
+                            <div class="form-group col-md-2">
+                                <label for="fecha-con"> De </label>
+                                <input type="date" class="form-control" id="fecha-in">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="fecha-con"> Hasta </label>
+                                <input type="date" class="form-control" id="fecha-out">
+                            </div>
+                        </div>
+
+
+                        <div class="form-row mt-3">
+                            <div class="form-group form-check ml-2">
+                                <input class="form-check-input" type="checkbox" value="" id="showTotal">
+                                <label class="form-check-label" for="showTotal">
+                                    Mostrar total de compra
+                                </label>
+
+                            </div>
+                            <div class="form-group form-check ml-2" id="contDate">
+                                <input class="form-check-input" type="checkbox" value="" id="filterDate">
+                                <label class="form-check-label" for="filterDate">
+                                    Filtrar por rango fecha de compra
+                                </label>
+
+                            </div>
+                        </div>
+
+
+
+                    </form>
+                </div>
+
+                <!-- Resultados -->
+                <div class="col-md-12">
+                    <table class="table table-striped" id="table-total-compras">
+                        <thead>
+                            <th scope="col">N° Compra</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Total</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    $(function () {
+        const checkTotal = $('#showTotal')
+        const divFilterBy = $('#cont-order-by')
+        const selOrderBy = $('#order-by')
+
+        const divDate = $('#contDate')
+        const filterByDate = $('#filterDate')
+        const rangeDate = $('#rangeDate')
+
+        const fechaIn = $('#fecha-in')
+        const fechaOut = $('#fecha-out')
+
+        const noRows = $('#alert')
+
+        checkTotal.on('click', function () {
+            if (checkTotal.is(':checked')) {
+                divFilterBy.addClass('d-none')
+                divDate.addClass('d-none')
+                rangeDate.addClass('d-none')
+                filterByDate.prop('checked', false)
+            }
+            else {
+                divFilterBy.removeClass('d-none')
+                divDate.removeClass('d-none')
+            }
+        })
+
+        filterByDate.on('click', function () {
+            if (filterByDate.is(':checked')) {
+                rangeDate.removeClass('d-none')
+            }
+            else {
+                rangeDate.addClass('d-none')
+            }
+        })
+
+
+        $('#btn-agregar').on('click', function () {
+
+            // Elementos Form con JQuery
+            const proveedorSelect = $('#id_prov option:selected')
+
+            var thead = $('thead')
+
+            var ruta = ''
+            var rtn = ''
+            var order = ''
+            // Variable para get de ruta con rango de fecha
+            var fechain = ''
+            var fechaout = ''
+
+            if (proveedorSelect.index() > 0) {
+                rtn = proveedorSelect.filter(':selected').val()
+                if (checkTotal.is(':checked')) {
+                    ruta = '/facturacion/consultas/compras/proveedor/total/'
+
+                    thead.html('')
+                    thead.append(`
+                            <th scope="col">N° Compra</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Total</th>
+                    `)
+                }
+                else {
+                    thead.html('')
+                    thead.append(`
+                            <th scope="col">N° Compra</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Total</th>
+                        `)
+
+                    var dateIn = new Date(fechaIn.val());
+                    var dateOut = new Date(fechaOut.val());
+
+                    if (filterByDate.is(':checked')) {
+                        // Obtener fechas de In y Out
+                        if (dateIn < dateOut) {
+                            var dayIn = dateIn.getDate() + 1;
+                            var dayOut = dateOut.getDate() + 1;
+
+                            var monthIn = dateIn.getMonth() + 1;
+                            var monthOut = dateOut.getMonth() + 1;
+
+                            var yearIn = dateIn.getFullYear();
+                            var yearOut = dateOut.getFullYear();
+
+
+                            fechain = '/' + yearIn + '-' + monthIn + '-' + dayIn
+                            fechaout = '/' + yearOut + '-' + monthOut + '-' + dayOut
+
+                            ruta = '/facturacion/consultas/compras/proveedor/lista/'
+                        }
+                        else {
+                            noRows.text("Primera fecha no puede ser mayor que segunda")
+                            noRows.removeClass('d-none')
+
+                            setTimeout(function () {
+                                noRows.addClass('d-none')
+                            }, 5000);
+
+
+                            fechaIn.val("yyyy-mm-dd")
+                            fechaOut.val("yyyy-mm-dd")
+
+                            ruta = ''
+                        }
+
+
+                    }
+                    else {
+                        ruta = '/facturacion/consultas/compras/proveedor/lista/'
+                    }
+
+                    if (selOrderBy.prop('selectedIndex') === 1) {
+                        order = '/desc'
+                    }
+                    else if (selOrderBy.prop('selectedIndex') === 2) {
+                        order = '/asc'
+                    }
+                    else {
+                        order = '/desc'
+                    }
+                }
+            }
+            else {
+                noRows.text("No hay proveedor seleccionado")
+                noRows.removeClass('d-none')
+
+                setTimeout(function () {
+                    noRows.addClass('d-none')
+                }, 5000);
+                ruta = ''
+            }
+
+            $.ajax({
+                url: ruta + rtn + order + fechain + fechaout,
+                success: function (compras) {
+                    var tbody = $('tbody')
+
+                    if (compras.length === 0 || compras[0].ID_COMPRA === null) {
+                        tbody.html('')
+
+                        noRows.text("No ha realizado compras a este proveedor")
+                        noRows.removeClass('d-none')
+
+                        setTimeout(function () {
+                            noRows.addClass('d-none')
+                        }, 5000);
+
+                    }
+                    else {
+
+                        tbody.html('')
+
+                        if ((ruta + rtn) === ('/facturacion/consultas/compras/proveedor/total/' + rtn)) {
+                            compras.forEach(compras => {
+                                tbody.append(`
+                            <tr>
+                                <td> ${compras.ID_COMPRA} </td>
+                                <td> ${compras.NOMBRE_PROVEEDOR} </td>
+                                <td> L. ${(compras.TOTAL).toFixed(2)} </td>
+                            </tr>
+                            `)
+                            })
+                        }
+                        else {
+                            compras.forEach(compras => {
+
+                                // Fecha format
+                                var fecha = new Date(compras.FECHA)
+                                var dd = String(fecha.getDate()).padStart(2, '0');
+                                var mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                                var yyyy = fecha.getFullYear();
+
+                                fecha = dd + '/' + mm + '/' + yyyy
+
+                                tbody.append(`
+                            <tr>
+                                <td> ${compras.ID_COMPRA} </td>
+                                <td> ${compras.NOMBRE_PROVEEDOR} </td>
+                                <td> ${fecha} </td>
+                                <td> L. ${(compras.TOTAL).toFixed(2)} </td>
+                            </tr>
+                            `)
+                            })
+                        }
+                    }
+                }
+            })
+        })
+    })
+</script>

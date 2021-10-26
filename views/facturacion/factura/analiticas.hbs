@@ -1,0 +1,353 @@
+<div class="container p-4">
+    <div class="alert alert-danger d-none" role="alert" id="alert">
+        A simple danger alert—check it out!
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    <i class="fas fa-chart-bar"></i> ANALÍTICAS GENERAL DE VENTAS
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Clientes con mayores pedidos
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="myChart" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Productos mas vendidos
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="myChartProducts" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Compras por superiores/inferiores al promedio de ventas
+
+                                </div>
+                                <div class="card-body" id="graph-container">
+                                    <div class="form-group col-md-6">
+                                        <p> Promedio de Ventas </p>
+                                        <h3 id="avg-ventas"> </h3>
+                                    </div>
+                                    <div class="form-group col-md-6 float-right">
+                                        <select id="filter-by" class="custom-select">
+                                            <option selected> Superior Promedio </option>
+                                            <option> Inferior Promedio </option>
+                                        </select>
+                                    </div>
+                                    <canvas id="myCharVentasProm" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Nivel de facturacion diario
+                                </div>
+                                <div class="card-body" id="graph-container">
+                                    <div class="form-group col-md-6">
+                                        <p> Total facturado (Ventas totales) </p>
+                                        <h3 id="total-ventas"></h3>
+                                    </div>
+                                    <canvas id="myCharTotal" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    const selFilterBy = $('#filter-by')
+    const avg = $('#avg-ventas')
+    const totalVentas = $('#total-ventas')
+
+    $.ajax({
+        url: "/analiticas/ventas/general",
+        success: function (general) {
+            var avgValue = "L. " + (general.jsonAvg[0].Promedio).toFixed(2)
+            var totalValue = "L. " + (general.jsonTotal[0].Total).toFixed(2)
+            avg.text(avgValue)
+            totalVentas.text(totalValue)
+
+            // Lista de Clientes con mas pedido
+            var labelsClientes = general.jsonVentasByCliente.map(function (e) {
+                return e.NOMBRE_PERSONA;
+            });
+
+            var dataClientes = general.jsonVentasByCliente.map(function (e) {
+                return e.Ordenes;
+            })
+
+            // Lista de productos mas vendidos
+            var labelsProducts = general.jsonVentasByProduct.map(function (e) {
+                return e.NOMBRE_PRODUCTOS;
+            });
+
+            var dataProducts = general.jsonVentasByProduct.map(function (e) {
+                return e.Cantidad;
+            })
+
+            //  Lista de Compras de Clientes por encima/debajo del promedio
+            var labelsVByAvg = general.jsonVentasProm.map(function (e) {
+                return e.NOMBRE_PERSONA;
+            });
+
+            var dataVByAvg = general.jsonVentasProm.map(function (e) {
+                return e.Total;
+            })
+
+            // Niveles de Venta por Dia
+            var labelsDaily = general.jsonVentasDaily.map(function (e) {
+                var fecha = new Date(e.FECHA)
+                var dd = String(fecha.getDate()).padStart(2, '0');
+                var mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                var yyyy = fecha.getFullYear();
+
+                fecha = dd + '/' + mm + '/' + yyyy
+                return fecha;
+            });
+
+            var dataDaily = general.jsonVentasDaily.map(function (e) {
+                return e.Total;
+            })
+
+            const ctxClients = document.getElementById('myChart').getContext('2d');
+            const ctxProducts = document.getElementById('myChartProducts').getContext('2d');
+            var ctxVentasProm = document.getElementById('myCharVentasProm').getContext('2d');
+            const ctxVentasDaily = document.getElementById('myCharTotal').getContext('2d');
+
+            // Elementos DOM
+            selFilterBy.change(function () {
+                if (selFilterBy.prop('selectedIndex') === 0) {
+                    labelsVByAvg = general.jsonVentasProm.map(function (e) {
+                        return e.NOMBRE_PERSONA;
+                    });
+
+                    dataVByAvg = general.jsonVentasProm.map(function (e) {
+                        return e.Total;
+                    })
+                    //myChartVentasByAvg.destroy()
+                    clearCanva()
+                    drawGraphics(labelsVByAvg, dataVByAvg)
+                }
+                else {
+                    labelsVByAvg = general.jsonVentasPromInf.map(function (e) {
+                        return e.NOMBRE_PERSONA;
+                    });
+
+                    dataVByAvg = general.jsonVentasPromInf.map(function (e) {
+                        return e.Total;
+                    })
+                    //myChartVentasByAvg.destroy()
+                    clearCanva()
+                    drawGraphics(labelsVByAvg, dataVByAvg)
+                }
+            })
+
+            // Grafico Ordenes por Clientes
+            const myChartClients = new Chart(ctxClients, {
+                type: 'bar',
+                data: {
+                    labels: labelsClientes,
+                    datasets: [{
+                        label: 'Cantidad de Ordenes',
+                        data: dataClientes,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                userCallback: function (label, index, labels) {
+                                    if (Math.floor(label) === label) {
+                                        return label;
+                                    }
+
+                                },
+                            }
+                        }],
+                    },
+                }
+            });
+
+            // Grafico Productos mas vendidos
+            const myChartProducts = new Chart(ctxProducts, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsProducts,
+                    datasets: [{
+                        label: 'Cantidad de Productos Vendidos',
+                        data: dataProducts,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                userCallback: function (label, index, labels) {
+                                    if (Math.floor(label) === label) {
+                                        return label;
+                                    }
+
+                                },
+                            }
+                        }],
+                    },
+                }
+            });
+
+            // Ventas Diarias
+
+            const myChartDaily = new Chart(ctxVentasDaily, {
+                type: 'line',
+                data: {
+                    labels: labelsDaily,
+                    datasets: [{
+                        label: 'Lempiras.',
+                        data: dataDaily,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            drawGraphics(labelsVByAvg, dataVByAvg)
+
+            function clearCanva() {
+                $('#myCharVentasProm').remove(); // this is my <canvas> element
+                $('#graph-container').append('<canvas id="myCharVentasProm" width="400" height="300"></canvas>');
+                canvas = document.querySelector('#myCharVentasProm');
+                ctxVentasProm = canvas.getContext('2d');
+            }
+
+            function drawGraphics(lblByAvg, dataByAvg) {
+
+                const myChartVByAvg = new Chart(ctxVentasProm, {
+                    type: 'bar',
+                    data: {
+                        labels: lblByAvg,
+                        datasets: [{
+                            label: 'Compras por Cliente (En Lempiras)',
+                            data: dataByAvg,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+
+        }
+    })
+
+</script>
