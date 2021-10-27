@@ -73,4 +73,49 @@ router.get("/ventas/general", async (req, res) => {
 })
 
 
+router.get("/productos", async (req, res) => {
+    res.render("productos/items/analiticas")
+})
+
+// Querys Productos
+router.get("/productos/general", async (req, res) => {
+    // Precio mas alto/bajo
+    const querySaveMinMax = `SELECT @highest:=max(PRECIO_UNIT), @lowest:=min(PRECIO_UNIT) FROM productos;`
+    const queryPrice = `SELECT NOMBRE_PRODUCTOS, PRECIO_UNIT FROM productos
+                        WHERE PRECIO_UNIT = @highest OR PRECIO_UNIT = @lowest;`
+    await pool.query(querySaveMinMax)
+    const queryProductsByPrice = await pool.query(queryPrice)
+    const jsonProductsByPrice = Object.values(JSON.parse(JSON.stringify(queryProductsByPrice)));
+    
+
+    // Promedio de Precios
+    const queryAvgPrice = `SELECT round(avg(PRECIO_UNIT), 2) as Promedio from productos;`
+    const queryByAvgPrice = await pool.query(queryAvgPrice)
+    const jsonAvgPrice = Object.values(JSON.parse(JSON.stringify(queryByAvgPrice)));
+
+    // Productos por Marca
+    const queryMarca = `SELECT marca.NOMBRE_MARCA, count(*) as Total
+                        FROM productos
+                        JOIN marca ON productos.ID_MARCA = marca.ID_MARCA
+                        GROUP BY productos.ID_MARCA
+                        ORDER BY Total DESC;`
+    const queryByMarca = await pool.query(queryMarca)
+    const jsonByMarca = Object.values(JSON.parse(JSON.stringify(queryByMarca)));
+
+    // Productos por Tipo
+    const queryTipo = `SELECT tipos_producto.NOMBRE_TIPOPRODUCTO, count(*) as Total
+                        FROM productos
+                        JOIN tipos_producto ON productos.ID_TIPOPRODUCTO = tipos_producto.ID_TIPOPRODUCTO
+                        GROUP BY productos.ID_TIPOPRODUCTO
+                        ORDER BY Total DESC;`
+    const queryByTipo = await pool.query(queryTipo)
+    const jsonByTipo = Object.values(JSON.parse(JSON.stringify(queryByTipo)));
+
+    // Cantidad Total en Stock
+    const queryTotalStock = await pool.query("SELECT sum(STOCK) as Total FROM productos")
+    const jsonTotalStock = Object.values(JSON.parse(JSON.stringify(queryTotalStock)));
+
+    res.json( { jsonProductsByPrice, jsonAvgPrice, jsonByMarca, jsonByTipo, jsonTotalStock } );
+})
+
 module.exports = router

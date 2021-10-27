@@ -86,10 +86,13 @@ router.post("/facturaregistro", async (req, res) => {
 
 // Lista general de ventas
 router.get("/ventas/transacciones", async (req, res) => {
-  const ventasQuery = `SELECT factura.ID_FACTURA, factura.FECHA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA,  modo_pago.DESC_MODOPAGO
-                      FROM factura
-                      INNER JOIN modo_pago ON modo_pago.ID_MODOPAGO = factura.ID_MODOPAGO
-                      INNER JOIN persona ON persona.ID_PERSONA = factura.ID_PERSONA`;
+  const ventasQuery = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT), 2) as TOTAL
+                      FROM factura_detalle
+                      INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
+                      INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
+                      INNER JOIN modo_pago ON modo_pago.ID_MODOPAGO = factura.ID_MODOPAGO 
+                      GROUP BY factura.ID_FACTURA
+                      ORDER BY factura.ID_FACTURA ASC`;
   const ventas = await pool.query(ventasQuery);
   res.render("facturacion/factura/list", { ventas });
 });
@@ -158,9 +161,12 @@ router.get("/compra", async (req, res) => {
 });
 
 router.get("/compra/transacciones", async (req, res) => {
-  const comprasQuery = `SELECT compra_producto.*, proveedores.NOMBRE_PROVEEDOR 
-                        FROM db_go.compra_producto
-                        INNER JOIN proveedores On compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR`;
+  const comprasQuery = `SELECT compra_producto.*, proveedores.NOMBRE_PROVEEDOR, round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA), 2) as TOTAL
+                        FROM compra_producto_detalle
+                        INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
+                        INNER JOIN proveedores ON compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR
+                        GROUP BY compra_producto.ID_COMPRA
+                        ORDER BY compra_producto.ID_COMPRA ASC;`;
   const compras = await pool.query(comprasQuery);
   res.render("facturacion/compra/list", { compras });
 });
@@ -239,7 +245,7 @@ router.get("/consultas/ventas", async (req, res) => {
 router.get("/consultas/ventas/cliente/:id_persona", async (req, res) => {
   const { id_persona } = req.params;
   // Busqueda Cliente
-  const cliQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT) as TOTAL
+  const cliQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT), 2) as TOTAL
                         FROM factura_detalle
                         INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
                         INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
@@ -256,7 +262,7 @@ router.get("/consultas/ventas/cliente/:id_persona", async (req, res) => {
 router.get("/consultas/ventas/empleado/:id", async (req, res) => {
   const { id } = req.params;
   // Busqueda Cliente
-  const empQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT) as TOTAL
+  const empQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT), 2) as TOTAL
                         FROM factura_detalle
                         INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
                         INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
@@ -273,7 +279,7 @@ router.get("/consultas/ventas/empleado/:id", async (req, res) => {
 router.get("/consultas/ventas/modopago/:cod", async (req, res) => {
   const { cod } = req.params;
   // Busqueda Cliente
-  const paymentQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT) as TOTAL
+  const paymentQuerybyId = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT), 2) as TOTAL
                         FROM factura_detalle
                         INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
                         INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
@@ -295,7 +301,7 @@ router.get("/consultas/compras", async (req, res) => {
 // Compras realizadas por proveedor (Listado)
 router.get("/consultas/compras/proveedor/lista/:rtn/:order", async (req, res) => {
     const { rtn, order } = req.params;
-    const proveedorQuerybyId = `SELECT compra_producto.*, proveedores.*, sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA) as TOTAL
+    const proveedorQuerybyId = `SELECT compra_producto.*, proveedores.*, round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA), 2) as TOTAL
                                 FROM compra_producto_detalle
                                 INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
                                 INNER JOIN proveedores ON compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR
@@ -319,7 +325,7 @@ router.get("/consultas/compras/proveedor/lista/:rtn/:order", async (req, res) =>
 // Compra realizadas por proveedores (Rango de Fecha)
 router.get("/consultas/compras/proveedor/lista/:rtn/:order/:fechain/:fechaout", async (req, res) => {
   const { rtn, order, fechain, fechaout } = req.params;
-  const dateFilter = `SELECT compra_producto.*, proveedores.*, sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA) as TOTAL
+  const dateFilter = `SELECT compra_producto.*, proveedores.*, round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA), 2) as TOTAL
                       FROM compra_producto_detalle
                       INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
                       INNER JOIN proveedores ON compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR
@@ -345,7 +351,7 @@ router.get("/consultas/compras/proveedor/lista/:rtn/:order/:fechain/:fechaout", 
 // Compras realizadas por proveedor (Total de Ventas)
 router.get("/consultas/compras/proveedor/total/:rtn", async (req, res) => {
   const { rtn } = req.params;
-  const proveedorQuerybyId = `SELECT compra_producto.ID_COMPRA, compra_producto.ID_PROVEEDOR, proveedores.*, sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA) as TOTAL
+  const proveedorQuerybyId = `SELECT compra_producto.ID_COMPRA, compra_producto.ID_PROVEEDOR, proveedores.*, round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA), 2) as TOTAL
                               FROM compra_producto_detalle
                               INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
                               INNER JOIN proveedores ON compra_producto.ID_PROVEEDOR = proveedores.ID_PROVEEDOR

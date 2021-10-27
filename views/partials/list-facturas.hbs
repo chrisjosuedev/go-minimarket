@@ -5,11 +5,11 @@
             <th scope="col">Cliente</th>
             <th scope="col">Fecha</th>
             <th scope="col">Modo Pago</th>
-
+            <th scope="col">Total</th>
         </tr>
     </thead>
     <tbody>
-    {{#each ventas}}
+        {{#each ventas}}
         <tr>
             <td>
                 {{ID_FACTURA}}
@@ -23,13 +23,16 @@
             <td>
                 {{DESC_MODOPAGO}}
             </td>
+            <td>
+                L. {{TOTAL}}
+            </td>
         </tr>
         {{else}}
-            <div class="col-md-12 mb-4 mx-auto">
-                <div class="card card-body text-center">
-                    <p class="mt-3"> No existen ventas </p>
-                </div>
+        <div class="col-md-12 mb-4 mx-auto">
+            <div class="card card-body text-center">
+                <p class="mt-3"> No existen ventas </p>
             </div>
-    {{/each}}
+        </div>
+        {{/each}}
     </tbody>
 </table>

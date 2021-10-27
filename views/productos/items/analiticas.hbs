@@ -1,0 +1,211 @@
+<div class="container p-4">
+    <div class="alert alert-danger d-none" role="alert" id="alert">
+        A simple danger alert—check it out!
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    <i class="fas fa-chart-bar"></i> ANALÍTICAS PRODUCTOS
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Producto mas caro/barato
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group col-md-6">
+                                        <p> Promedio de Precio </p>
+                                        <h3 id="avg-price"></h3>
+                                    </div>
+                                    <canvas id="myChart" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Cantidad de productos por Tipo
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="myCharTypes" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6 mx-auto">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Cantidad de productos por Marca
+                                </div>
+                                <div class="card-body" id="graph-container">
+                                    <div class="form-group col-md-6">
+                                        <p> Stock general total </p>
+                                        <h3 id="stock-total"></h3>
+                                    </div>
+                                    <canvas id="myCharStock" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const avgPrice = $('#avg-price')
+    const stockTotal = $('#stock-total')
+
+    $.ajax({
+        url: "/analiticas/productos/general",
+        success: function (general) {
+            var priceAvg = "L. " + (general.jsonAvgPrice[0].Promedio)
+            var stock = (general.jsonTotalStock[0].Total) + " Ítems"
+
+            avgPrice.text(priceAvg)
+            stockTotal.text(stock)
+
+            // Caro/Barato
+            var labelsHighLow = general.jsonProductsByPrice.map(function (e) {
+                return e.NOMBRE_PRODUCTOS;
+            });
+
+            var dataHighLow = general.jsonProductsByPrice.map(function (e) {
+                return e.PRECIO_UNIT;
+            })
+
+            // Marca
+            var labelsMarca = general.jsonByMarca.map(function (e) {
+                return e.NOMBRE_MARCA;
+            });
+
+            var dataMarca = general.jsonByMarca.map(function (e) {
+                return e.Total;
+            })
+
+            // Tipo
+            var labelsTipo = general.jsonByTipo.map(function (e) {
+                return e.NOMBRE_TIPOPRODUCTO;
+            });
+
+            var dataTipo = general.jsonByTipo.map(function (e) {
+                return e.Total;
+            })
+
+
+            const ctxPrice = document.getElementById('myChart').getContext('2d');
+            const ctxType = document.getElementById('myCharTypes').getContext('2d');
+            const ctxMarca = document.getElementById('myCharStock').getContext('2d');
+
+
+            const myChartPrice = new Chart(ctxPrice, {
+                type: 'bar',
+                data: {
+                    labels: labelsHighLow,
+                    datasets: [{
+                        label: 'Precio Lps.',
+                        data: dataHighLow,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const myChartTipo = new Chart(ctxType, {
+                type: 'polarArea',
+                data: {
+                    labels: labelsTipo,
+                    datasets: [{
+                        label: 'Productos Tipo: ',
+                        data: dataTipo,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+
+            const myChartMarca = new Chart(ctxMarca, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsMarca,
+                    datasets: [{
+                        label: 'Productos Marca: ',
+                        data: dataMarca,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
+    })
+
+
+</script>

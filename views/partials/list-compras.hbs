@@ -1,9 +1,10 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th scope="col">ID</th>
+            <th scope="col">ID Compra</th>
             <th scope="col">Proveedor</th>
             <th scope="col">Fecha</th>
+            <th scope="col">Total</th>
 
         </tr>
     </thead>
@@ -18,6 +19,9 @@
             </td>
             <td>
                 {{format FECHA}}
+            </td>
+            <td>
+                L. {{TOTAL}}
             </td>
         </tr>
         {{else}}
