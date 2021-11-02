@@ -1,0 +1,44 @@
+<div class="form-group col-md-6">
+    <p> N° Compra </p>
+    <h3> {{compraDetails.1.ID_COMPRA}} </h3>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">ID Producto</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Tipo Producto</th>
+            <th scope="col">Marca</th>
+            <th scope="col">Cantidad</th>
+            <th scope="col">Precio Compra</th>
+            <th scope="col"> Subtotal </th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each compraDetails}}
+        <tr>
+            <td>
+                {{ID_PRODUCTOS}}
+            </td>
+            <td>
+                {{NOMBRE_PRODUCTOS}}
+            </td>
+            <td>
+                {{NOMBRE_TIPOPRODUCTO}}
+            </td>
+            <td>
+                {{NOMBRE_MARCA}}
+            </td>
+            <td>
+                {{CANTIDAD}}
+            </td>
+            <td>
+                L. {{PRECIO_COMPRA}}
+            </td>
+            <td>
+                L. {{SUBTOTAL}}
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

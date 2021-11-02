@@ -1,0 +1,184 @@
+<div class="container p-4">
+    <div class="alert alert-danger d-none" role="alert" id="alert">
+        A simple danger alert—check it out!
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    <i class="far fa-question-circle"></i> LISTADO GENERAL PERSONA
+                </div>
+                <div class="card-body">
+                    <!--action="/facturacion/consultas/ventas" method="POST"-->
+                    <form id="ventas-total">
+                        <label> Filtrar por </label>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <select id="tipo-bus" class="custom-select">
+                                    <option selected> - Opción - </option>
+                                    <option> Busquedas </option>
+                                    <option> Todos </option>
+                                </select>
+                            </div>
+                            <!-- d-none-->
+                            <div class="form-group col-md-4 d-none" id="container-busquedas">
+                                <input id="id-busquedas" type="text" class="form-control"
+                                    placeholder="Ingrese su busqueda">
+                            </div>
+
+                            <button type="button" id="btn-agregar" class="btn btn-success float-right mb-4 mr-2">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!--
+                <div class="col-md-12">
+                    {{> list-general-persona }}
+                </div>-->
+
+                <div class="col-md-12">
+                    <table class="table table-striped" id="table-persona">
+                        <thead>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Apellidos</th>
+                            <th scope="col">Sexo</th>
+                            <th scope="col">Celular</th>
+                            <th scope="col">Direccion</th>
+                            <th scope="col">Ciudad</th>
+                            <th scope="col">Depto</th>
+                            <th scope="col">Tipo</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    const selGeneral = $('#tipo-bus')
+    const cont = $('#container-busquedas')
+    const inputBus = $('#id-busquedas')
+    $(function () {
+
+        selGeneral.on('change', function () {
+            if (selGeneral.prop('selectedIndex') === 1) {
+                cont.removeClass('d-none')
+            }
+            else {
+                cont.addClass('d-none')
+            }
+        });
+
+        var ruta = ''
+        var name = ''
+        var tbody = $('tbody')
+        var thead = $('thead')
+        $('#btn-agregar').on('click', function () {
+            if (selGeneral.prop('selectedIndex') === 0) {
+                console.log("Ninguna opción esta seleccionada")
+                ruta = ''
+                name = ''
+            }
+            else if (selGeneral.prop('selectedIndex') === 1) {
+                tbody.html('')
+                thead.html('')
+                thead.append(`
+                            <th scope="col">ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Apellido</th>
+                            <th scope="col">Sexo</th>
+                            <th scope="col">Celular</th>
+                            <th scope="col">Residencia</th>
+                            <th scope="col">Tipo</th>
+                        `)
+                ruta = '/persona/consultas/'
+                name = inputBus.val()
+            }
+            else {
+                tbody.html('')
+                thead.html('')
+                thead.append(`
+                            <th scope="col">ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Apellidos</th>
+                            <th scope="col">Sexo</th>
+                            <th scope="col">Celular</th>
+                            <th scope="col">Direccion</th>
+                            <th scope="col">Ciudad</th>
+                            <th scope="col">Depto</th>
+                            <th scope="col">Tipo</th>
+                        `)
+                name = ''
+                ruta = '/persona/consultas/general'
+            }
+
+
+            $.ajax({
+                url: ruta + name,
+                success: function (general) {
+                    //console.log(ruta, name)
+                    if (general.length === 0) {
+                        tbody.html('')
+                        let noRows = $('#alert')
+                        noRows.text("No hay registros encontrados")
+                        noRows.removeClass('d-none')
+
+                        setTimeout(function () {
+                            noRows.addClass('d-none')
+                        }, 5000);
+                    }
+                    else {
+                        if (ruta === '/persona/consultas/general') {
+                            tbody.html('')
+
+                            general.forEach(general => {
+
+                                tbody.append(`
+                                <tr>
+                                    <td> ${general.ID_PERSONA} </td>
+                                    <td> ${general.NOMBRE_PERSONA} </td>
+                                    <td> ${general.APELLIDO_PERSONA} </td>
+                                    <td> ${general.SEXO} </td>
+                                    <td> ${general.CELULAR} </td>
+                                    <td> ${general.DIRECCION_RESIDENCIA} </td>
+                                    <td> ${general.NOMBRE_CIUDAD} </td>
+                                    <td> ${general.NOMBRE_DEPTO} </td>
+                                    <td> ${general.TIPO} </td>
+                                </tr>
+                                `)
+                            })
+                        }
+                        if (ruta === '/persona/consultas/') {
+                            tbody.html('')
+                            general.forEach(general => {
+
+                                tbody.append(`
+                                <tr>
+                                    <td> ${general.ID} </td>
+                                    <td> ${general.Nombre} </td>
+                                    <td> ${general.Apellido} </td>
+                                    <td> ${general.SEXO} </td>
+                                    <td> ${general.CELULAR} </td>
+                                    <td> ${general.Residencia} </td>
+                                    <td> ${general.TIPO} </td>
+                                </tr>
+                                `)
+                            })
+                        }
+                    }
+                }
+            })
+        })
+    })
+</script>

@@ -86,7 +86,7 @@ router.post("/facturaregistro", async (req, res) => {
 
 // Lista general de ventas
 router.get("/ventas/transacciones", async (req, res) => {
-  const ventasQuery = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO, round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT), 2) as TOTAL
+  const ventasQuery = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO
                       FROM factura_detalle
                       INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
                       INNER JOIN persona ON factura.ID_PERSONA = persona.ID_PERSONA
@@ -96,6 +96,66 @@ router.get("/ventas/transacciones", async (req, res) => {
   const ventas = await pool.query(ventasQuery);
   res.render("facturacion/factura/list", { ventas });
 });
+
+
+// Lista Detalle Factura
+router.get("/ventas/transacciones/:id", async (req, res) => {
+  const { id } = req.params;
+  const queryDetails = `SELECT factura_detalle.ID_FACTURA, factura_detalle.ID_PRODUCTOS, productos.NOMBRE_PRODUCTOS, tipos_producto.NOMBRE_TIPOPRODUCTO, marca.NOMBRE_MARCA,
+                        factura_detalle.CANTIDAD, factura_detalle.PRECIO_UNIT,
+                        round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT), 2) as SUBTOTAL
+                        FROM factura_detalle
+                        INNER JOIN productos ON productos.ID_PRODUCTOS = factura_detalle.ID_PRODUCTOS
+                        INNER JOIN tipos_producto ON productos.ID_TIPOPRODUCTO = tipos_producto.ID_TIPOPRODUCTO
+                        INNER JOIN marca ON productos.ID_MARCA = marca.ID_MARCA
+                        WHERE ID_FACTURA = ?
+                        GROUP BY factura_detalle.ID_PRODUCTOS`
+  const facturaDetails = await pool.query(queryDetails, [id]);
+
+  const querySubISV = `SELECT @subtotal:=round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT), 2), 
+                      @isv:=round(sum(factura_detalle.CANTIDAD * factura_detalle.PRECIO_UNIT) * 0.15, 3)
+                      FROM factura_detalle WHERE ID_FACTURA = ?;`
+  const queryTotal = `SELECT factura_detalle.ID_FACTURA, @subtotal as SUBTOTAL, @isv as ISV, round((@subtotal + @isv), 2) as Total
+                      FROM factura_detalle WHERE ID_FACTURA = ? GROUP BY factura_detalle.ID_FACTURA;`
+
+  await pool.query(querySubISV, [id])
+
+  const facturaTotal = await pool.query(queryTotal, [id])
+  
+  
+  res.render("facturacion/factura/listDetail", { facturaDetails, facturaTotal: facturaTotal[0] });
+});
+
+// Lista Detalle Compra
+router.get("/compras/transacciones/:id", async (req, res) => {
+  const { id } = req.params;
+  const queryDetails = `SELECT compra_producto_detalle.ID_COMPRA, compra_producto_detalle.ID_PRODUCTOS, productos.NOMBRE_PRODUCTOS, tipos_producto.NOMBRE_TIPOPRODUCTO, marca.NOMBRE_MARCA,
+                        compra_producto_detalle.CANTIDAD, compra_producto_detalle.PRECIO_COMPRA,
+                        round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA), 2) as SUBTOTAL
+                        FROM compra_producto_detalle
+                        INNER JOIN productos ON productos.ID_PRODUCTOS = compra_producto_detalle.ID_PRODUCTOS
+                        INNER JOIN tipos_producto ON productos.ID_TIPOPRODUCTO = tipos_producto.ID_TIPOPRODUCTO
+                        INNER JOIN marca ON productos.ID_MARCA = marca.ID_MARCA
+                        WHERE ID_COMPRA = ?
+                        GROUP BY compra_producto_detalle.ID_PRODUCTOS;`
+
+  const compraDetails = await pool.query(queryDetails, [id]);
+
+  const querySubISV = `SELECT @subtotal:=round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA), 2), 
+                        @isv:=round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA) * 0.15, 3)
+                        FROM compra_producto_detalle WHERE ID_COMPRA = ?;`
+
+  const queryTotal = `SELECT compra_producto_detalle.ID_COMPRA, @subtotal as SUBTOTAL, @isv as ISV, round((@subtotal + @isv), 3) as TOTAL
+                      FROM compra_producto_detalle WHERE ID_COMPRA = ? GROUP BY compra_producto_detalle.ID_COMPRA;`
+
+  await pool.query(querySubISV, [id])
+
+  const compraTotal = await pool.query(queryTotal, [id])
+  
+  
+  res.render("facturacion/compra/listDetail", { compraDetails, compraTotal: compraTotal[0] });
+});
+
 
 // -> /facturacion/metodopago
 

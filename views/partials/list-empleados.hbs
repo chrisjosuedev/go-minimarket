@@ -7,6 +7,7 @@
             <th scope="col">Sexo</th>
             <th scope="col">Fecha Contratación</th>
             <th scope="col">Puesto</th>
+            <th scope="col">Salario</th>
             <th scope="col">Celular</th>
             <th scope="col">Ciudad</th>
             <th scope="col">Depto</th>
@@ -35,6 +36,9 @@
                 {{DESCRIPCION_CATEGORIA}}
             </td>
             <td>
+                L. {{SALARIO}}
+            </td>
+            <td>
                 {{CELULAR}}
             </td>
             <td>
@@ -47,7 +51,7 @@
                 <a href="/persona/empleados/edit/{{ID_PERSONA}}" class="btn btn-primary">
                     <i class="fas fa-pen"></i>
                 </a>
-                <a href="/persona/empleados/delete/{{ID_PERSONA}}" class="btn btn-danger mt-2">
+                <a href="/persona/empleados/delete/{{ID_PERSONA}}" class="btn btn-danger">
                     <i class="fa fa-trash"></i>
                 </a>
             </td>

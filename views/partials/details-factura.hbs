@@ -1,0 +1,44 @@
+<div class="form-group col-md-6">
+    <p> N° Factura  </p>
+    <h3> {{facturaDetails.1.ID_FACTURA}} </h3>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">ID Producto</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Tipo Producto</th>
+            <th scope="col">Marca</th>
+            <th scope="col">Cantidad</th>
+            <th scope="col">Precio Unit.</th>
+            <th scope="col"> Subtotal </th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each facturaDetails}}
+        <tr>
+            <td>
+                {{ID_PRODUCTOS}}
+            </td>
+            <td>
+                {{NOMBRE_PRODUCTOS}}
+            </td>
+            <td>
+                {{NOMBRE_TIPOPRODUCTO}}
+            </td>
+            <td>
+                {{NOMBRE_MARCA}}
+            </td>
+            <td>
+                {{CANTIDAD}}
+            </td>
+            <td>
+                L. {{PRECIO_UNIT}}
+            </td>
+            <td>
+                L. {{SUBTOTAL}}
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

@@ -1,0 +1,20 @@
+<div class="container">
+    <div class="col-md-12 mt-5">
+        <div class="card">
+            <div class="card-header font-weight-bold">
+                <i class="fas fa-list"></i> Lista Detalle de Compras
+            </div>
+            <div class="card-body">
+                {{> details-compra }}
+                <div class="form-group col-md-2 float-right">
+                    <label> Subtotal</label>
+                    <input type="text" id="st-venta" class="form-control" placeholder="Subtotal" disabled value="{{compraTotal.SUBTOTAL}}">
+                    <label class="mt-2"> ISV </label>
+                    <input type="text" id="isv" class="form-control " placeholder="ISV" disabled value="{{compraTotal.ISV}}">
+                    <label class="mt-2"> Total </label>
+                    <input type="text" id="total" class="form-control" placeholder="Total" disabled value="{{compraTotal.TOTAL}}">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
