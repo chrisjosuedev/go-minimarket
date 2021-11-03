@@ -1,0 +1,222 @@
+<div class="container">
+    <div class="card mt-2">
+        <div class="card-header font-weight-bold">
+            <i class="fas fa-chart-bar"></i> ANALÍTICAS FECHA DE COMPRA
+        </div>
+        <div class="card-body">
+            <div class="form-group col-md-6 mb-4">
+                <p> Total facturado (Compras totales) </p>
+                <h3 id="total-compras"></h3>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header font-weight-bold">
+                            Nivel de compras diario
+                        </div>
+                        <div class="card-body">
+                            <canvas id="myCharTotal" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header font-weight-bold">
+                            Nivel de compras mensual
+                        </div>
+                        <div class="card-body">
+                            <canvas id="myCharMensual" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6 mx-auto">
+                    <div class="card">
+                        <div class="card-header font-weight-bold">
+                            Nivel de compras anual
+                        </div>
+                        <div class="card-body">
+                            <canvas id="myCharAnual" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const totalCompras = $('#total-compras')
+
+    $.ajax({
+        url: "/analiticas/compras/general",
+        success: function (general) {
+            var totalValue = "L. " + (general.jsonCompras[0].Total)
+            totalCompras.text(totalValue)
+
+             // Fechas
+            const ctxComprasDaily = document.getElementById('myCharTotal').getContext('2d');
+            const ctxComprasMonth = document.getElementById('myCharMensual').getContext('2d');
+            const ctxComprasYear = document.getElementById('myCharAnual').getContext('2d');
+
+                        // Niveles de Venta por Dia
+            var labelsDaily = general.jsonComprasDaily.map(function (e) {
+                var fecha = new Date(e.FECHA)
+                var dd = String(fecha.getDate()).padStart(2, '0');
+                var mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                var yyyy = fecha.getFullYear();
+
+                fecha = dd + '/' + mm + '/' + yyyy
+                return fecha;
+            });
+
+            var dataDaily = general.jsonComprasDaily.map(function (e) {
+                return e.Total;
+            })
+
+            // Nivel Venta por Mes
+            var labelsMensual = general.jsonComprasMensual.map(function (e) {
+                return e.Mes;
+            });
+
+            var dataMensual = general.jsonComprasMensual.map(function (e) {
+                return e.Total;
+            })
+
+            // Nivel Venta por Anual
+            var labelsAnual = general.jsonComprasAnual.map(function (e) {
+                return e.Year;
+            });
+
+            var dataAnual = general.jsonComprasAnual.map(function (e) {
+                return e.Total;
+            })
+
+            // Ventas Diarias
+
+            const myChartDaily = new Chart(ctxComprasDaily, {
+                type: 'line',
+                data: {
+                    labels: labelsDaily,
+                    datasets: [{
+                        label: 'Lempiras.',
+                        data: dataDaily,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Ventas Mes
+
+            const myChartMensual = new Chart(ctxComprasMonth, {
+                type: 'line',
+                data: {
+                    labels: labelsMensual,
+                    datasets: [{
+                        label: 'Lempiras.',
+                        data: dataMensual,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Ventas Anuales
+
+            const myChartAnual = new Chart(ctxComprasYear, {
+                type: 'line',
+                data: {
+                    labels: labelsAnual,
+                    datasets: [{
+                        label: 'Lempiras.',
+                        data: dataAnual,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+
+            
+        }
+    })
+
+</script>
