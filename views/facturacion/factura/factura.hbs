@@ -13,14 +13,32 @@
                         <label>Datos</label>
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <select id="cliente-tipo" name="id_persona" class="custom-select">
+                                <!--<select id="cliente-tipo" name="id_persona" class="custom-select">
                                     <option selected> - Cliente - </option>
                                     {{> options/select-clientes }}
-                                </select>
-                                <a href="/persona/clientes/add" class="btn btn-success float-right mt-2 ml-2">
+                                </select>-->
+                                <input type="text" id="id-cliente" class="form-control" name="id_persona" placeholder="ID Cliente">
+
+
+                            </div>
+                            <div class="form-group">
+                                <button type="button" id="bCliente" class="btn btn-success float-right">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="form-group ml-2">
+                                <a href="/persona/clientes/add" class="btn btn-success float-right">
                                     <i class="far fa-address-card"></i> Nuevo
                                 </a>
                             </div>
+
+
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <input type="text" id="name-cli" class="form-control" placeholder="Nombres" disabled>
+                            </div>
+
                             <div class="form-group col-md-4">
                                 <input type="text" id="cel-cli" class="form-control" placeholder="Celular" disabled>
                             </div>
@@ -97,9 +115,13 @@
     </div>
 </div>
 
-
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script type="text/javascript">
     const celText = this.document.getElementById('cel-cli')
+    const nameText = this.document.getElementById('name-cli')
+
     const preUnit = this.document.getElementById('price-pro')
 
     const alert = document.getElementById('alert');
@@ -112,20 +134,33 @@
     const isvVenta = this.document.getElementById('isv')
     const totalVenta = this.document.getElementById('total')
 
-    clienteSel.onchange = function dataClientes() {
-        const cliValue = clienteSel.value
-        const opValue = document.getElementsByClassName('opt-cli')
+    // Busqueda de Cliente
 
-        const selectItem = clienteSel.selectedIndex
+    const buscarCliente = $("#bCliente")
+    const noRows = $('#alert')
 
-        if (selectItem === 0) {
-            celText.value = "Celular"
-        }
-        else {
-            celText.value = opValue[selectItem - 1].classList[1]
-            emailText.value = opValue[selectItem - 1].classList[2]
-        }
-    }
+    buscarCliente.on('click', function () {
+        const idCliente = $("#id-cliente")
+        $.ajax({
+            url: "/persona/consultas/clientes",
+            success: function (clientes) {
+                if (JSON.stringify(clientes).includes(idCliente.val())) {
+                    var index = clientes.findIndex(obj => obj.ID_PERSONA === idCliente.val())
+                    celText.value = clientes[index].CELULAR
+                    nameText.value = clientes[index].NOMBRE_PERSONA + " " + clientes[index].APELLIDO_PERSONA
+                }
+                else {
+                    noRows.text("Cliente no existe")
+                    noRows.removeClass('d-none')
+
+                    setTimeout(function () {
+                        noRows.addClass('d-none')
+                    }, 5000);
+                }
+
+            }
+        })
+    });
 
     // Productos
     var idProd = 0

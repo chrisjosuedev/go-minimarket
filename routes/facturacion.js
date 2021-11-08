@@ -12,13 +12,12 @@ router.get("/facturaregistro", async (req, res) => {
                     INNER JOIN persona ON empleado.ID_PERSONA = persona.ID_PERSONA 
                     HAVING ID_CATEGORIA = 1 OR ID_CATEGORIA = 3`;
   const empleados = await pool.query(empQuery);
-  const clientes = await pool.query("SELECT * FROM persona");
+  //const clientes = await pool.query("SELECT * FROM persona");
   const metodopago = await pool.query("SELECT * FROM modo_pago");
   const productos = await pool.query("SELECT * FROM productos WHERE STOCK > 0");
   res.render("facturacion/factura/factura", {
     metodopago,
     empleados,
-    clientes,
     productos,
   });
 });

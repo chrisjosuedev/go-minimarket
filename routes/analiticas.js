@@ -153,6 +153,16 @@ router.get("/ventas/general", async (req, res) => {
   const queryVentasAnual = await pool.query(queryNivelAnual);
   const jsonVentasAnual = Object.values(JSON.parse(JSON.stringify(queryVentasAnual)));
 
+  // Nivel de Ventas por Hora
+  const queryNivelHora = `SELECT DATE_FORMAT(factura.FECHA, "%h%p") as Hora, 
+                          	round(sum(CANTIDAD * PRECIO_UNIT), 2) as Total
+                          FROM factura_detalle
+                          INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
+                          group by EXTRACT(HOUR FROM factura.FECHA)
+                          order by Total DESC;`;
+  
+  const queryVentasHora = await pool.query(queryNivelHora);
+  const jsonVentasHora = Object.values(JSON.parse(JSON.stringify(queryVentasHora)));
 
   res.json({
     jsonVentasByCliente,
@@ -163,6 +173,7 @@ router.get("/ventas/general", async (req, res) => {
     jsonVentasDaily,
     jsonVentasMensual,
     jsonVentasAnual,
+    jsonVentasHora,
     jsonTotal,
   });
 });

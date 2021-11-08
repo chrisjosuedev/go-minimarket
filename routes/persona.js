@@ -168,6 +168,22 @@ router.get("/consultas/general", async (req, res) => {
   res.json(jsonPersona);
 });
 
+
+// JSON Clientes 
+router.get("/consultas/clientes", async (req, res) => {
+  const clienteQuery = `select persona.ID_PERSONA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
+                        	persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO, 
+                            case when empleado.ID_PERSONA is null then true else false end as TIPO
+                        from persona
+                        left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
+                        INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
+                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
+                        HAVING TIPO = true;`
+  const cliente = await pool.query(clienteQuery);
+  const jsonClientes = Object.values(JSON.parse(JSON.stringify(cliente)));
+  res.json(jsonClientes);
+})
+
 // JSON persona String
 router.get("/consultas/:name", async (req, res) => {
   const { name } = req.params;

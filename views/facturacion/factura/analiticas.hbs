@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header font-weight-bold">
-                    <i class="fas fa-chart-bar"></i> ANALÍTICAS GENERAL DE VENTAS
+                    <i class="fas fa-chart-bar"></i> ANALÍTICAS GENERAL DE VENTAS Y HORA
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -90,13 +90,23 @@
                         </div>
                     </div>
                     <div class="row mt-2">
-                        <div class="col-md-6 mx-auto">
+                        <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header font-weight-bold">
                                     Nivel de facturacion anual
                                 </div>
                                 <div class="card-body">
                                     <canvas id="myCharAnual" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header font-weight-bold">
+                                    Ventas por hora
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="myCharHora" width="400" height="300"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -190,6 +200,16 @@
                 return e.Total;
             })
 
+            // Nivel Hora
+             var labelsHora = general.jsonVentasHora.map(function (e) {
+                return e.Hora;
+            });
+
+            var dataHora = general.jsonVentasHora.map(function (e) {
+                return e.Total;
+            })
+
+
 
             const ctxClients = document.getElementById('myChart').getContext('2d');
             const ctxProducts = document.getElementById('myChartProducts').getContext('2d');
@@ -199,6 +219,9 @@
             const ctxVentasDaily = document.getElementById('myCharTotal').getContext('2d');
             const ctxVentasMonth = document.getElementById('myCharMensual').getContext('2d');
             const ctxVentasYear = document.getElementById('myCharAnual').getContext('2d');
+
+            // Hora
+            const ctxVentasHora = document.getElementById('myCharHora').getContext('2d');
 
             // Elementos DOM
             selFilterBy.change(function () {
@@ -401,6 +424,43 @@
                     datasets: [{
                         label: 'Lempiras.',
                         data: dataAnual,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Hora
+            const myChartHora = new Chart(ctxVentasHora, {
+                type: 'bar',
+                data: {
+                    labels: labelsHora,
+                    datasets: [{
+                        label: 'Lempiras.',
+                        data: dataHora,
                         backgroundColor: [
                             'rgba(255, 99, 132, 0.2)',
                             'rgba(54, 162, 235, 0.2)',
