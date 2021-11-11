@@ -35,6 +35,7 @@ router.post("/add", async (req, res) => {
   res.redirect("/productos/add");
 });
 
+
 // Editar Productos
 router.get("/edit/:id_productos", async (req, res) => {
   const { id_productos } = req.params;
@@ -78,6 +79,55 @@ router.get("/delete/:id_productos", async (req, res) => {
   req.flash("success", "Producto Eliminado Correctamente");
   res.redirect("/productos/add");
 });
+
+// Consultas
+router.get("/consultas", async (req, res) => {
+  const tipos_producto = await pool.query("SELECT * FROM tipos_producto");
+  const marca = await pool.query("SELECT * FROM marca");
+
+  res.render("productos/list", { tipos_producto, marca });
+});
+
+// JSON Consultas Productos General
+router.get("/consultas/general", async (req, res) => {
+  const queryProdGeneral = `SELECT ID_PRODUCTOS, NOMBRE_PRODUCTOS, STOCK, PRECIO_UNIT, 
+                            	(SELECT marca.NOMBRE_MARCA FROM marca WHERE productos.ID_MARCA = marca.ID_MARCA) as MARCA, 
+                                (SELECT NOMBRE_TIPOPRODUCTO FROM tipos_producto WHERE productos.ID_TIPOPRODUCTO = tipos_producto.ID_TIPOPRODUCTO) as TIPO
+                            FROM PRODUCTOS;`;
+  
+  const queryProductos = await pool.query(queryProdGeneral);
+  const jsonProductos = Object.values(JSON.parse(JSON.stringify(queryProductos)));
+
+  res.json(jsonProductos)
+})
+
+// JSON Consulta Productos por Nombre
+router.get("/consultas/:name", async (req, res) => {
+  const { name } = req.params;
+  const like = "%'"
+  const proQuery = `SELECT productos.*, marca.NOMBRE_MARCA, tipos_producto.NOMBRE_TIPOPRODUCTO 
+                        FROM PRODUCTOS 
+                        INNER JOIN marca ON marca.ID_MARCA = productos.ID_MARCA 
+                        INNER JOIN tipos_producto ON tipos_producto.ID_TIPOPRODUCTO = productos.ID_TIPOPRODUCTO
+                        WHERE productos.NOMBRE_PRODUCTOS NOT LIKE '` + name + like
+  const producto = await pool.query(proQuery);
+  const jsonProducto = Object.values(JSON.parse(JSON.stringify(producto)));
+  res.json(jsonProducto);
+})
+
+// JSON Rango Precios
+router.get("/consultas/rango/:n1/:n2", async (req, res) => {
+  const { n1, n2 } = req.params;
+
+  const proQuery = `SELECT productos.*, marca.NOMBRE_MARCA, tipos_producto.NOMBRE_TIPOPRODUCTO 
+                    FROM PRODUCTOS 
+                    INNER JOIN marca ON marca.ID_MARCA = productos.ID_MARCA 
+                    INNER JOIN tipos_producto ON tipos_producto.ID_TIPOPRODUCTO = productos.ID_TIPOPRODUCTO
+                    WHERE productos.PRECIO_UNIT between ? AND ?;`
+  const producto = await pool.query(proQuery, [n1, n2]);
+  const jsonProducto = Object.values(JSON.parse(JSON.stringify(producto)));
+  res.json(jsonProducto);
+})
 
 // PROVEEDORES
 

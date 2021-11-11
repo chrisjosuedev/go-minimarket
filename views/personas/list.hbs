@@ -17,6 +17,8 @@
                                 <select id="tipo-bus" class="custom-select">
                                     <option selected> - Opción - </option>
                                     <option> Busquedas </option>
+                                    <option> Solo Clientes </option>
+                                    <option> Solo Empleados </option>
                                     <option> Todos </option>
                                 </select>
                             </div>
@@ -44,7 +46,6 @@
                         <thead>
                             <th scope="col">ID</th>
                             <th scope="col">Nombre</th>
-                            <th scope="col">Apellidos</th>
                             <th scope="col">Sexo</th>
                             <th scope="col">Celular</th>
                             <th scope="col">Direccion</th>
@@ -74,6 +75,8 @@
         selGeneral.on('change', function () {
             if (selGeneral.prop('selectedIndex') === 1) {
                 cont.removeClass('d-none')
+                inputBus.val("")
+                inputBus.focus()
             }
             else {
                 cont.addClass('d-none')
@@ -96,7 +99,6 @@
                 thead.append(`
                             <th scope="col">ID</th>
                             <th scope="col">Nombre</th>
-                            <th scope="col">Apellido</th>
                             <th scope="col">Sexo</th>
                             <th scope="col">Celular</th>
                             <th scope="col">Residencia</th>
@@ -105,13 +107,44 @@
                 ruta = '/persona/consultas/'
                 name = inputBus.val()
             }
+            else if (selGeneral.prop('selectedIndex') === 2) {
+                tbody.html('')
+                thead.html('')
+                thead.append(`
+                            <th scope="col">ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Sexo</th>
+                            <th scope="col">Celular</th>
+                            <th scope="col">Direccion</th>
+                            <th scope="col">Ciudad</th>
+                            <th scope="col">Depto</th>
+                        `)
+                name = ''
+                ruta = '/persona/consultas/clienteslist'
+            }
+            else if (selGeneral.prop('selectedIndex') === 3) {
+                tbody.html('')
+                thead.html('')
+                thead.append(`
+                            <th scope="col">ID</th>
+                            <th scope="col">Código</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Puesto</th>
+                            <th scope="col">Sexo</th>
+                            <th scope="col">Celular</th>
+                            <th scope="col">Direccion</th>
+                            <th scope="col">Ciudad</th>
+                            <th scope="col">Depto</th>
+                        `)
+                name = ''
+                ruta = '/persona/consultas/empleadoslist'
+            }
             else {
                 tbody.html('')
                 thead.html('')
                 thead.append(`
                             <th scope="col">ID</th>
                             <th scope="col">Nombre</th>
-                            <th scope="col">Apellidos</th>
                             <th scope="col">Sexo</th>
                             <th scope="col">Celular</th>
                             <th scope="col">Direccion</th>
@@ -147,8 +180,7 @@
                                 tbody.append(`
                                 <tr>
                                     <td> ${general.ID_PERSONA} </td>
-                                    <td> ${general.NOMBRE_PERSONA} </td>
-                                    <td> ${general.APELLIDO_PERSONA} </td>
+                                    <td> ${general.Nombre} </td>
                                     <td> ${general.SEXO} </td>
                                     <td> ${general.CELULAR} </td>
                                     <td> ${general.DIRECCION_RESIDENCIA} </td>
@@ -165,13 +197,48 @@
 
                                 tbody.append(`
                                 <tr>
-                                    <td> ${general.ID} </td>
+                                    <td> ${general.ID_PERSONA} </td>
                                     <td> ${general.Nombre} </td>
-                                    <td> ${general.Apellido} </td>
                                     <td> ${general.SEXO} </td>
                                     <td> ${general.CELULAR} </td>
                                     <td> ${general.Residencia} </td>
                                     <td> ${general.TIPO} </td>
+                                </tr>
+                                `)
+                            })
+                        }
+                        if (ruta === '/persona/consultas/clienteslist') {
+                            tbody.html('')
+                            general.forEach(general => {
+
+                                tbody.append(`
+                                <tr>
+                                    <td> ${general.ID_PERSONA} </td>
+                                    <td> ${general.Nombre} </td>
+                                    <td> ${general.SEXO} </td>
+                                    <td> ${general.CELULAR} </td>
+                                    <td> ${general.DIRECCION_RESIDENCIA} </td>
+                                    <td> ${general.NOMBRE_CIUDAD} </td>
+                                    <td> ${general.NOMBRE_DEPTO} </td>
+                                </tr>
+                                `)
+                            })
+                        }
+                        if (ruta === '/persona/consultas/empleadoslist') {
+                            tbody.html('')
+                            general.forEach(general => {
+
+                                tbody.append(`
+                                <tr>
+                                    <td> ${general.ID_PERSONA} </td>
+                                    <td> ${general.ID_EMPLEADO} </td>
+                                    <td> ${general.Nombre} </td>
+                                    <td> ${general.DESCRIPCION_CATEGORIA} </td>
+                                    <td> ${general.SEXO} </td>
+                                    <td> ${general.CELULAR} </td>
+                                    <td> ${general.DIRECCION_RESIDENCIA} </td>
+                                    <td> ${general.NOMBRE_CIUDAD} </td>
+                                    <td> ${general.NOMBRE_DEPTO} </td>
                                 </tr>
                                 `)
                             })

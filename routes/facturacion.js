@@ -121,8 +121,21 @@ router.get("/ventas/transacciones/:id", async (req, res) => {
 
   const facturaTotal = await pool.query(queryTotal, [id])
   
+  // General Factura
+  const queryGeneral = `SELECT FECHA, (SELECT concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) FROM persona, factura
+                          WHERE persona.ID_PERSONA = factura.ID_PERSONA AND ID_FACTURA = ?) as Cliente, 
+                        (SELECT concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) FROM persona, empleado, factura
+                          WHERE persona.ID_PERSONA = empleado.ID_PERSONA AND empleado.ID_EMPLEADO = factura.ID_EMPLEADO AND ID_FACTURA = ?) as Empleado,
+                           modo_pago.DESC_MODOPAGO
+                        FROM factura
+                        INNER JOIN modo_pago ON modo_pago.ID_MODOPAGO = factura.ID_MODOPAGO
+                        Where ID_FACTURA = ?;`
+
+  const facturaGeneral = await pool.query(queryGeneral, [id, id, id]);
+
+  console.log(facturaGeneral)
   
-  res.render("facturacion/factura/listDetail", { facturaDetails, facturaTotal: facturaTotal[0] });
+  res.render("facturacion/factura/listDetail", { facturaDetails, facturaTotal: facturaTotal[0], facturaGeneral });
 });
 
 // Lista Detalle Compra

@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../database");
-//const fs = require("fs")
 
 // PERSONA
 
@@ -156,7 +155,7 @@ router.get("/consultas", async (req, res) => {
 
 // JSON General
 router.get("/consultas/general", async (req, res) => {
-  const personaQuery = `SELECT persona.ID_PERSONA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
+  const personaQuery = `SELECT persona.ID_PERSONA, concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as Nombre, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
                         persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO, 
                         CASE WHEN empleado.ID_PERSONA is null then 'Cliente' else 'Empleado' end as TIPO
                         from persona
@@ -184,21 +183,52 @@ router.get("/consultas/clientes", async (req, res) => {
   res.json(jsonClientes);
 })
 
+// JSON Solo Clientes
+router.get("/consultas/clienteslist", async (req, res) => {
+  const clienteQuery = `SELECT persona.ID_PERSONA, concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as Nombre, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
+                         persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO 
+                        FROM persona
+                        left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
+                        INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
+                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
+                        WHERE (persona.ID_PERSONA NOT IN (SELECT empleado.ID_PERSONA FROM empleado));`
+  const cliente = await pool.query(clienteQuery);
+  const jsonClientes = Object.values(JSON.parse(JSON.stringify(cliente)));
+  res.json(jsonClientes);
+})
+
+// JSON Solo Empleados
+router.get("/consultas/empleadoslist", async (req, res) => {
+  const empQuery = `SELECT persona.ID_PERSONA, empleado.ID_EMPLEADO, concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as Nombre, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
+                      categoria_laboral.DESCRIPCION_CATEGORIA, persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO 
+                     FROM persona
+                     left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
+                     INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
+                     INNER JOIN categoria_laboral on empleado.ID_CATEGORIA = categoria_laboral.ID_CATEGORIA
+                     INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
+                     WHERE (persona.ID_PERSONA IN (SELECT empleado.ID_PERSONA FROM empleado));`
+  const emp = await pool.query(empQuery);
+  const jsonEmp = Object.values(JSON.parse(JSON.stringify(emp)));
+  res.json(jsonEmp);
+})
+
 // JSON persona String
 router.get("/consultas/:name", async (req, res) => {
   const { name } = req.params;
-  const personaQuery = `SELECT insert(persona.ID_PERSONA, 2, 4, 'HND') as ID, reverse(persona.NOMBRE_PERSONA) as Nombre, substring(persona.APELLIDO_PERSONA, 2, 6) as Apellido, repeat((if(persona.SEXO = 1, 'F', 'M')), 3) as SEXO, 
-                        	left(persona.CELULAR, 6) as CELULAR, concat_ws(', ', upper(persona.DIRECCION_RESIDENCIA), ciudad.NOMBRE_CIUDAD, lower(departamentos.NOMBRE_DEPTO)) as Residencia, 
+  const like = " LIKE '%"
+  const personaQuery = `SELECT persona.ID_PERSONA, concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as Nombre, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
+                        	persona.CELULAR, upper(concat_ws(', ', persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO)) as Residencia, 
                             case when empleado.ID_PERSONA is null then 'CLIENTE' else 'EMPLEADO' end as TIPO
                         from persona
                         left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
                         INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
-                        WHERE persona.NOMBRE_PERSONA = trim(?);`
-  const persona = await pool.query(personaQuery, [name]);
+                        WHERE persona.NOMBRE_PERSONA` + like + name + "%'"
+  const persona = await pool.query(personaQuery);
   const jsonPersona = Object.values(JSON.parse(JSON.stringify(persona)));
   res.json(jsonPersona);
 });
+
 
 // JSON Empleados Listado General
 router.get("/empleados", async (req, res) => {

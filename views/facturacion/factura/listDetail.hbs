@@ -1,18 +1,54 @@
 <div class="container">
     <div class="col-md-12 mt-5">
-        <div class="card">
+
+        <div class="card mb-2">
             <div class="card-header font-weight-bold">
-                <i class="fas fa-list"></i> Lista Detalle de Facturación
+                <i class="fas fa-list"></i> General
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="form-group col-md-2">
+                        <p> <strong> N° Factura: </strong>  </p>
+                        <h5> {{facturaDetails.1.ID_FACTURA}} </h5>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <p> <strong>Fecha:</strong>  </p>
+                        <h5> {{format facturaGeneral.0.FECHA}} <br> 
+                        {{hourFormat facturaGeneral.0.FECHA}} </h5>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <p> <strong>Cliente:</strong> </p>
+                        <h5> {{facturaGeneral.0.Cliente}} </h5>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <p> <strong>Atendió:</strong> </p>
+                        <h5> {{facturaGeneral.0.Empleado}} </h5>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <p> <strong>Pagó con:</strong> </p>
+                        <h5> {{facturaGeneral.0.DESC_MODOPAGO}} </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-2">
+            <div class="card-header font-weight-bold">
+                <i class="fas fa-list"></i> Lista Detalle
             </div>
             <div class="card-body">
                 {{> details-factura }}
                 <div class="form-group col-md-2 float-right">
                     <label> Subtotal</label>
-                    <input type="text" id="st-venta" class="form-control" placeholder="Subtotal" disabled value="{{facturaTotal.SUBTOTAL}}">
+                    <input type="text" id="st-venta" class="form-control" placeholder="Subtotal" disabled
+                        value="{{facturaTotal.SUBTOTAL}}">
                     <label class="mt-2"> ISV </label>
-                    <input type="text" id="isv" class="form-control " placeholder="ISV" disabled value="{{facturaTotal.ISV}}">
+                    <input type="text" id="isv" class="form-control " placeholder="ISV" disabled
+                        value="{{facturaTotal.ISV}}">
                     <label class="mt-2"> Total </label>
-                    <input type="text" id="total" class="form-control" placeholder="Total" disabled value="{{facturaTotal.Total}}">
+                    <input type="text" id="total" class="form-control" placeholder="Total" disabled
+                        value="{{facturaTotal.Total}}">
                 </div>
             </div>
         </div>
