@@ -9,10 +9,13 @@
                     <form action="/productos/add" method="POST">
                         <div class="form-row">
                             <div class="form-group col-md-8">
-                                <input type="text" onkeyup="javascript:this.value=this.value.toUpperCase();" class="form-control to-mayus" name="nombre_productos" placeholder="Nombre del Producto" autofocus>
+                                <input type="text" onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                    class="form-control to-mayus" name="nombre_productos"
+                                    placeholder="Nombre del Producto" autofocus>
                             </div>
                             <div class="form-group col-md-4">
-                                <input type="number" min="0" step="0.01" class="form-control" name="precio_unit" placeholder="Precio">
+                                <input type="number" min="0" step="0.01" class="form-control" name="precio_unit"
+                                    placeholder="Precio">
                             </div>
                             <!--<div class="form-group col-md-4">
                                 <input type="number" class="form-control" min="0"
@@ -21,7 +24,7 @@
                         </div>
 
                         <div class="form-row">
-                            
+
                             <div class="form-group col-md-6">
                                 <select id="inputState sel-tipo" name="id_marca" class="custom-select">
                                     <option selected> - Seleccione marca del producto - </option>
@@ -45,6 +48,23 @@
             </div>
 
         </div>
+        <div class="col-md-4 mx-auto">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    Opciones
+                </div> 
+                <div class="card-body text-center">
+                    <a href="/" class="btn btn-primary btn-block">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <a href="/productos/informe-general" class="btn btn-danger btn-block mt-2">
+                        <i class="fas fa-file-pdf"></i> Reporte
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
     <div class="col-md-12 mt-5">

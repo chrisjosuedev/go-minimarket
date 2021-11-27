@@ -2,6 +2,114 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../database");
 
+// Generacion de PDF
+
+const PDF = require("pdfkit-construct");
+
+// Generacion Informe Simple PDF
+router.get("/informe-general-empleados", async (req, res) => {
+
+  // Generacion PDF
+  const doc = new PDF({ bufferPages: true });
+
+  const filename = `Empleados-Listado-General.pdf`;
+
+  const stream = res.writeHead(200, {
+    "Content-Type": "application/pdf",
+    "Content-disposition": `attachment;filename=${filename}`,
+  });
+
+  doc.on("data", (data) => {
+    stream.write(data);
+  });
+  doc.on("data", () => {
+    stream.end();
+  });
+
+  // Header
+  doc.setDocumentHeader({
+    height: '12'
+  }, () => {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(18)
+      .text("LISTADO GENERAL DE EMPLEADOS", {align: 'center'});
+
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(16)
+      .text("Go! Store", {
+        align: 'left',
+      }, doc.header.y + 8)
+  
+
+    });
+
+  // Query de Empleados
+  const empleadosQuery = `SELECT persona.ID_PERSONA, 
+                          concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as NOMBRE, 
+                          (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
+                          persona.CELULAR, 
+                          upper(concat_ws(', ', ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO)) as RESIDENCIA, 
+                          empleado.ID_EMPLEADO, 
+                          categoria_laboral.DESCRIPCION_CATEGORIA, categoria_laboral.SALARIO, 
+                          concat_ws('/', day(empleado.FECHA_CONTRATACION), month(empleado.FECHA_CONTRATACION), year(empleado.FECHA_CONTRATACION)) as CONTRATO
+                          FROM persona 
+                          INNER JOIN empleado on persona.ID_PERSONA = empleado.ID_PERSONA
+                          INNER JOIN categoria_laboral on empleado.ID_CATEGORIA = categoria_laboral.ID_CATEGORIA
+                          INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
+                          INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO`;
+
+  const empleados = await pool.query(empleadosQuery);
+
+  const employee = empleados.map( (emp) => {
+
+    const item = {
+      id: emp.ID_PERSONA,
+      name: emp.NOMBRE,
+      sexo: emp.SEXO,
+      contratacion: emp.CONTRATO,
+      puesto: emp.DESCRIPCION_CATEGORIA,
+      salario: emp.SALARIO,
+      residencia: emp.RESIDENCIA
+    }
+
+    return item
+  }) 
+ 
+  doc.addTable(
+    [
+      { key: "id", label: "ID", align: "left" },
+      { key: "name", label: "Nombre", align: "center" },
+      { key: "sexo", label: "Sexo", align: "center" },
+      { key: "puesto", label: "Puesto", align: "center" },
+      { key: "contratacion", label: "Contratado", align: "center" },
+      { key: "salario", label: "Salario L.", align: "left" },
+      { key: "residencia", label: "Residencia", align: "center" },
+    ],
+    employee,
+    {
+      
+      border: null,
+      width: "fill_body",
+      striped: true,
+      headBackground : '#23282A',
+      headColor : '#FFFFFF',
+      headFont : "Helvetica-Bold",
+      headFontSize : 9,
+      stripedColors: ["#FFFFFF", "#B2CBD3"],
+      cellsFont : "Helvetica",
+      cellsFontSize : 9,
+      headAlign: "center",
+    }
+  );
+
+  // render tables
+  doc.render();
+  doc.end();
+});
+
 // PERSONA
 
 // -> /persona/empleados

@@ -2,6 +2,121 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../database");
 
+const PDF = require("pdfkit-construct");
+
+// Generacion Informe Simple PDF
+router.get("/informe-general", async (req, res) => {
+ 
+  // Fecha Actual
+  var now = new Date();
+  var day = now.getDate()
+  var month = (now.getMonth()) + 1
+  var year = now.getFullYear()
+  var time = now.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: "numeric", hour12: true })
+  var fecha = day + '/' + month + '/' + year + ' ' + time
+
+  // Generacion PDF
+  const doc = new PDF({ bufferPages: true });
+
+  const filename = `Productos-Listado-General.pdf`;
+
+  const stream = res.writeHead(200, {
+    "Content-Type": "application/pdf",
+    "Content-disposition": `attachment;filename=${filename}`,
+  });
+
+  doc.on("data", (data) => {
+    stream.write(data);
+  });
+  doc.on("data", () => {
+    stream.end();
+  });
+
+  // Header
+  doc.setDocumentHeader({
+    height: '12'
+  }, () => {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(18)
+      .text("INVENTARIO DE PRODUCTOS", {align: 'center'});
+
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(16)
+      .text("Go! Store", {
+        align: 'left',
+      }, doc.header.y + 8)
+
+    doc.fontSize(9)
+    doc.font("Helvetica")
+    
+    doc.text(`Inventario actualizado a ${fecha}`, {
+      align: 'right'
+    }, doc.header.y + 8)
+  
+   
+
+    });
+
+  // Query de Productos
+  const productosQuery = `SELECT productos.*, marca.NOMBRE_MARCA, tipos_producto.NOMBRE_TIPOPRODUCTO 
+                          FROM PRODUCTOS 
+                          INNER JOIN marca ON marca.ID_MARCA = productos.ID_MARCA 
+                          INNER JOIN tipos_producto ON tipos_producto.ID_TIPOPRODUCTO = productos.ID_TIPOPRODUCTO
+                          GROUP BY productos.ID_PRODUCTOS
+                          ORDER BY productos.ID_PRODUCTOS ASC`;
+
+  const products = await pool.query(productosQuery);
+
+  const productos = products.map( (prod) => {
+    const item = {
+      id: prod.ID_PRODUCTOS,
+      item: prod.NOMBRE_PRODUCTOS,
+      stock: prod.STOCK,
+      price: prod.PRECIO_UNIT,
+      tipo: prod.NOMBRE_TIPOPRODUCTO,
+      marca: prod.NOMBRE_MARCA
+    }
+
+    return item
+  }) 
+ 
+  doc.addTable(
+    [
+      { key: "id", label: "ID", align: "center" },
+      { key: "item", label: "Item", align: "center" },
+      { key: "stock", label: "Stock", align: "center" },
+      { key: "price", label: "Precio L.", align: "center" },
+      { key: "tipo", label: "Tipo", align: "center" },
+      { key: "marca", label: "Marca", align: "center" },
+    ],
+    productos,
+    {
+      
+      border: null,
+      width: "fill_body",
+      striped: true,
+      headBackground : '#23282A',
+      headColor : '#FFFFFF',
+      headFont : "Helvetica-Bold",
+      headFontSize : 10,
+      stripedColors: ["#FFFFFF", "#B2CBD3"],
+      cellsPadding: 10,
+      cellsFont : "Helvetica",
+      cellsFontSize : 10,
+      marginLeft: 45,
+      marginRight: 45,
+      headAlign: "center",
+    }
+  );
+
+  // render tables
+  doc.render();
+  doc.end();
+});
+
 // PRODUCTOS
 
 // -> /productos
@@ -28,13 +143,11 @@ router.post("/add", async (req, res) => {
     id_tipoproducto,
   };
 
-  
   await pool.query("INSERT INTO productos set ?", [newProducto]);
 
   req.flash("success", "Producto Agregado Correctamente");
   res.redirect("/productos/add");
 });
-
 
 // Editar Productos
 router.get("/edit/:id_productos", async (req, res) => {
@@ -94,26 +207,31 @@ router.get("/consultas/general", async (req, res) => {
                             	(SELECT marca.NOMBRE_MARCA FROM marca WHERE productos.ID_MARCA = marca.ID_MARCA) as MARCA, 
                                 (SELECT NOMBRE_TIPOPRODUCTO FROM tipos_producto WHERE productos.ID_TIPOPRODUCTO = tipos_producto.ID_TIPOPRODUCTO) as TIPO
                             FROM PRODUCTOS;`;
-  
-  const queryProductos = await pool.query(queryProdGeneral);
-  const jsonProductos = Object.values(JSON.parse(JSON.stringify(queryProductos)));
 
-  res.json(jsonProductos)
-})
+  const queryProductos = await pool.query(queryProdGeneral);
+  const jsonProductos = Object.values(
+    JSON.parse(JSON.stringify(queryProductos))
+  );
+
+  res.json(jsonProductos);
+});
 
 // JSON Consulta Productos por Nombre
 router.get("/consultas/:name", async (req, res) => {
   const { name } = req.params;
-  const like = "%'"
-  const proQuery = `SELECT productos.*, marca.NOMBRE_MARCA, tipos_producto.NOMBRE_TIPOPRODUCTO 
+  const like = "%'";
+  const proQuery =
+    `SELECT productos.*, marca.NOMBRE_MARCA, tipos_producto.NOMBRE_TIPOPRODUCTO 
                         FROM PRODUCTOS 
                         INNER JOIN marca ON marca.ID_MARCA = productos.ID_MARCA 
                         INNER JOIN tipos_producto ON tipos_producto.ID_TIPOPRODUCTO = productos.ID_TIPOPRODUCTO
-                        WHERE productos.NOMBRE_PRODUCTOS NOT LIKE '` + name + like
+                        WHERE productos.NOMBRE_PRODUCTOS NOT LIKE '` +
+    name +
+    like;
   const producto = await pool.query(proQuery);
   const jsonProducto = Object.values(JSON.parse(JSON.stringify(producto)));
   res.json(jsonProducto);
-})
+});
 
 // JSON Rango Precios
 router.get("/consultas/rango/:n1/:n2", async (req, res) => {
@@ -123,11 +241,11 @@ router.get("/consultas/rango/:n1/:n2", async (req, res) => {
                     FROM PRODUCTOS 
                     INNER JOIN marca ON marca.ID_MARCA = productos.ID_MARCA 
                     INNER JOIN tipos_producto ON tipos_producto.ID_TIPOPRODUCTO = productos.ID_TIPOPRODUCTO
-                    WHERE productos.PRECIO_UNIT between ? AND ?;`
+                    WHERE productos.PRECIO_UNIT between ? AND ?;`;
   const producto = await pool.query(proQuery, [n1, n2]);
   const jsonProducto = Object.values(JSON.parse(JSON.stringify(producto)));
   res.json(jsonProducto);
-})
+});
 
 // PROVEEDORES
 

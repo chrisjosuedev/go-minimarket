@@ -17,7 +17,8 @@
                                     <option selected> - Cliente - </option>
                                     {{> options/select-clientes }}
                                 </select>-->
-                                <input type="text" id="id-cliente" class="form-control" name="id_persona" placeholder="ID Cliente">
+                                <input type="text" id="id-cliente" class="form-control" name="id_persona"
+                                    placeholder="ID Cliente">
 
 
                             </div>
@@ -87,15 +88,23 @@
 
                         <button type="button" class="btn btn-success float-right mb-4">
                             <i class="fas fa-print"></i> Imprimir Factura
-                        </button> -->
+                        </button> 
+                        <a href="/facturacion/factura" class="btn btn-success float-right mb-4 mr-2" onclick="$(this).closest('form').submit();" target="_blank"> 
+                            <i class="fas fa-file-invoice"></i> Procesar
+                        </a> -->
+                        <button type="button" id="btn-agregar" class="btn btn-success float-left mb-4 mr-2">
+                            <i class="far fa-plus-square"></i> Agregar Producto
+                        </button>
 
-                        <button type="submit" class="btn btn-success float-right mb-4 mr-2">
+                        <button type="submit" id="procesar" class="btn btn-success float-left mb-4 mr-2">
                             <i class="fas fa-file-invoice"></i> Procesar
                         </button>
 
-                        <button type="button" id="btn-agregar" class="btn btn-success float-right mb-4 mr-2">
-                            <i class="far fa-plus-square"></i> Agregar Producto
-                        </button>
+                        <a href="/facturacion/facturaregistro" class="btn btn-success mb-4 mr-2 float-right">
+                            <i class="fas fa-external-link-alt"></i> Nueva Factura
+                        </a>
+
+
                         <div class="col-md-12 mt-5">
                             {{> factura-list-registro }}
                         </div>

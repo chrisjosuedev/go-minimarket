@@ -11,7 +11,7 @@
         </tr>
     </thead>
     <tbody>
-    {{#each productos}}
+        {{#each productos}}
         <tr>
             <td>
                 {{ID_PRODUCTOS}}
@@ -41,14 +41,11 @@
             </td>
         </tr>
         {{else}}
-            <div class="col-md-12 mb-4 mx-auto">
-                <div class="card card-body text-center">
-                    <p class="mt-3"> No existen productos </p>
-                </div>
+        <div class="col-md-12 mb-4 mx-auto">
+            <div class="card card-body text-center">
+                <p class="mt-3"> No existen productos </p>
             </div>
-    {{/each}}
+        </div>
+        {{/each}}
     </tbody>
 </table>
-
-
-
