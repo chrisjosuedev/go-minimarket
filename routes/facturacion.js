@@ -4,6 +4,8 @@ const pool = require("../database");
 
 const PDF = require("pdfkit-construct");
 
+const { isLoggedIn } = require('../lib/auth')
+
 // FACTURACION
 // Imprimir Factura Listada
 // Generacion Informe Simple PDF
@@ -186,7 +188,7 @@ router.get("/factura/:id", async (req, res) => {
 
 // -> /facturacion/facturaregistro
 
-router.get("/facturaregistro", async (req, res) => {
+router.get("/facturaregistro",  isLoggedIn, async (req, res) => {
   const empQuery = `SELECT ID_EMPLEADO, ID_CATEGORIA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA 
                     FROM empleado 
                     INNER JOIN persona ON empleado.ID_PERSONA = persona.ID_PERSONA 
@@ -444,7 +446,7 @@ router.post("/facturaregistro", async (req, res) => {
 
 
 // Lista general de ventas
-router.get("/ventas/transacciones", async (req, res) => {
+router.get("/ventas/transacciones", isLoggedIn, async (req, res) => {
   const ventasQuery = `SELECT factura.*, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, modo_pago.DESC_MODOPAGO
                       FROM factura_detalle
                       INNER JOIN factura ON factura.ID_FACTURA = factura_detalle.ID_FACTURA
@@ -457,7 +459,7 @@ router.get("/ventas/transacciones", async (req, res) => {
 });
 
 // Lista Detalle Factura
-router.get("/ventas/transacciones/:id", async (req, res) => {
+router.get("/ventas/transacciones/:id",  isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const queryDetails = `SELECT factura_detalle.ID_FACTURA, factura_detalle.ID_PRODUCTOS, productos.NOMBRE_PRODUCTOS, tipos_producto.NOMBRE_TIPOPRODUCTO, marca.NOMBRE_MARCA,
                         factura_detalle.CANTIDAD, factura_detalle.PRECIO_UNIT,
@@ -500,7 +502,7 @@ router.get("/ventas/transacciones/:id", async (req, res) => {
 });
 
 // Lista Detalle Compra
-router.get("/compras/transacciones/:id", async (req, res) => {
+router.get("/compras/transacciones/:id", isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const queryDetails = `SELECT compra_producto_detalle.ID_COMPRA, compra_producto_detalle.ID_PRODUCTOS, productos.NOMBRE_PRODUCTOS, tipos_producto.NOMBRE_TIPOPRODUCTO, marca.NOMBRE_MARCA,
                         compra_producto_detalle.CANTIDAD, compra_producto_detalle.PRECIO_COMPRA,
@@ -533,7 +535,7 @@ router.get("/compras/transacciones/:id", async (req, res) => {
 
 // -> /facturacion/metodopago
 
-router.get("/metodopago/add", async (req, res) => {
+router.get("/metodopago/add",  isLoggedIn, async (req, res) => {
   const metodopago = await pool.query("SELECT * FROM modo_pago");
   req.flash("success", "Modo Pago agregado Correctamente");
   res.render("facturacion/metodopago/metodopago", { metodopago });
@@ -588,13 +590,13 @@ router.get("/metodopago/delete/:id_modopago", async (req, res) => {
 
 // -> /facturacion/compra
 
-router.get("/compra", async (req, res) => {
+router.get("/compra",  isLoggedIn, async (req, res) => {
   const proveedores = await pool.query("SELECT * FROM proveedores");
   const productos = await pool.query("SELECT * FROM productos");
   res.render("facturacion/compra/compra", { proveedores, productos });
 });
 
-router.get("/compra/transacciones", async (req, res) => {
+router.get("/compra/transacciones", isLoggedIn, async (req, res) => {
   const comprasQuery = `SELECT compra_producto.*, proveedores.NOMBRE_PROVEEDOR, round(sum(compra_producto_detalle.CANTIDAD * compra_producto_detalle.PRECIO_COMPRA), 2) as TOTAL
                         FROM compra_producto_detalle
                         INNER JOIN compra_producto ON compra_producto.ID_COMPRA = compra_producto_detalle.ID_COMPRA
@@ -659,7 +661,7 @@ router.post("/compra", async (req, res) => {
 });
 
 // Ruta de Busquedas en Facturacion
-router.get("/consultas/ventas", async (req, res) => {
+router.get("/consultas/ventas", isLoggedIn, async (req, res) => {
   const empQuery = `SELECT ID_EMPLEADO, ID_CATEGORIA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA 
                     FROM empleado 
                     INNER JOIN persona ON empleado.ID_PERSONA = persona.ID_PERSONA 
@@ -727,7 +729,7 @@ router.get("/consultas/ventas/modopago/:cod", async (req, res) => {
 });
 
 // Ruta de Busquedas en Compras
-router.get("/consultas/compras", async (req, res) => {
+router.get("/consultas/compras", isLoggedIn, async (req, res) => {
   const proveedores = await pool.query("SELECT * FROM proveedores");
   res.render("facturacion/factura/bycompras", { proveedores });
 });

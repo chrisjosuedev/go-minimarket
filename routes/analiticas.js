@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../database");
-
+const { isLoggedIn } = require('../lib/auth')
 
 // Ventas
-router.get("/ventas", async (req, res) => {
+router.get("/ventas", isLoggedIn, async (req, res) => {
   res.render("facturacion/factura/analiticas");
 });
 
 // Compras
-router.get("/compras", async (req, res) => {
+router.get("/compras", isLoggedIn, async (req, res) => {
   res.render("facturacion/compra/analiticas");
 });
 
@@ -178,7 +178,7 @@ router.get("/ventas/general", async (req, res) => {
   });
 });
 
-router.get("/productos", async (req, res) => {
+router.get("/productos",  isLoggedIn, async (req, res) => {
   res.render("productos/items/analiticas");
 });
 

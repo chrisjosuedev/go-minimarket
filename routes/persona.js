@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../database");
-
+const { isLoggedIn } = require('../lib/auth')
 // Generacion de PDF
 
 const PDF = require("pdfkit-construct");
@@ -114,7 +114,7 @@ router.get("/informe-general-empleados", async (req, res) => {
 
 // -> /persona/empleados
 
-router.get("/empleados/add", async (req, res) => {
+router.get("/empleados/add", isLoggedIn, async (req, res) => {
   const empleadosQuery = `SELECT persona.ID_PERSONA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, persona.CELULAR, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO, empleado.ID_EMPLEADO, categoria_laboral.DESCRIPCION_CATEGORIA, categoria_laboral.SALARIO, empleado.FECHA_CONTRATACION 
                           FROM persona 
                           INNER JOIN empleado on persona.ID_PERSONA = empleado.ID_PERSONA
@@ -239,7 +239,7 @@ router.get("/empleados/delete/:id_persona", async (req, res) => {
 
 // -> /persona/clientes
 
-router.get("/clientes/add", async (req, res) => {
+router.get("/clientes/add", isLoggedIn, async (req, res) => {
   const clienteQuery = `SELECT persona.ID_PERSONA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO
                         FROM persona 
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
@@ -251,7 +251,7 @@ router.get("/clientes/add", async (req, res) => {
 });
 
 // Consulta General
-router.get("/consultas", async (req, res) => {
+router.get("/consultas", isLoggedIn, async (req, res) => {
   const personaQuery = `SELECT persona.ID_PERSONA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
                         persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO, 
                           CASE WHEN empleado.ID_PERSONA is null then 'Cliente' else 'Empleado' end as TIPO

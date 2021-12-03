@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../database");
-
+const { isLoggedIn } = require('../lib/auth')
 const PDF = require("pdfkit-construct");
 
 // Generacion Informe Simple PDF
@@ -121,7 +121,7 @@ router.get("/informe-general", async (req, res) => {
 
 // -> /productos
 
-router.get("/add", async (req, res) => {
+router.get("/add", isLoggedIn, async (req, res) => {
   const productosQuery = `SELECT productos.*, marca.NOMBRE_MARCA, tipos_producto.NOMBRE_TIPOPRODUCTO 
                           FROM PRODUCTOS 
                           INNER JOIN marca ON marca.ID_MARCA = productos.ID_MARCA 
@@ -194,7 +194,7 @@ router.get("/delete/:id_productos", async (req, res) => {
 });
 
 // Consultas
-router.get("/consultas", async (req, res) => {
+router.get("/consultas",  isLoggedIn, async (req, res) => {
   const tipos_producto = await pool.query("SELECT * FROM tipos_producto");
   const marca = await pool.query("SELECT * FROM marca");
 
@@ -251,7 +251,7 @@ router.get("/consultas/rango/:n1/:n2", async (req, res) => {
 
 // -> /productos/proveedor
 
-router.get("/proveedores/add", async (req, res) => {
+router.get("/proveedores/add", isLoggedIn, async (req, res) => {
   const proveedores = await pool.query("SELECT * FROM proveedores");
   res.render("productos/proveedores/add", { proveedores });
 });
@@ -311,7 +311,7 @@ router.get("/proveedores/delete/:id_proveedor", async (req, res) => {
 
 // -> /productos/tipo
 
-router.get("/tipo/add", async (req, res) => {
+router.get("/tipo/add", isLoggedIn, async (req, res) => {
   const tipos_producto = await pool.query("SELECT * FROM tipos_producto");
   res.render("productos/tipo/add", { tipos_producto });
 });
@@ -365,7 +365,7 @@ router.get("/tipo/delete/:id_tipoproducto", async (req, res) => {
 
 // -> /productos/marca
 
-router.get("/marca/add", async (req, res) => {
+router.get("/marca/add", isLoggedIn, async (req, res) => {
   const marca = await pool.query("SELECT * FROM marca");
   res.render("productos/marca/add", { marca });
 });

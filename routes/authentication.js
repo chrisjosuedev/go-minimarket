@@ -3,7 +3,6 @@ const router = express.Router()
 const pool = require("../database");
 const passport = require('passport');
 
-
 router.get('/signin', (req, res) => {
     res.render('auth/signin');
 })

@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const helpers = require('../lib/helpers');
 const pool = require("../database");
+const { isLoggedIn } = require('../lib/auth')
 
 // LABORAL
 
 // -> /laboral/categorias
 
-router.get("/categorias/add", async (req, res) => {
+router.get("/categorias/add", isLoggedIn, async (req, res) => {
   const categorias = await pool.query("SELECT * FROM categoria_laboral");
   res.render("laboral/categorias/add", { categorias });
 });
@@ -67,7 +68,7 @@ router.get("/categorias/delete/:id_categoria", async (req, res) => {
 // USUARIOS
 
 // -> /users/usuarios
-router.get("/users", async (req, res) => {
+router.get("/users", isLoggedIn, async (req, res) => {
   const usuario = await pool.query("SELECT usuario.USERNAME, rol_users.DESC_ROL FROM usuario INNER JOIN rol_users ON rol_users.ID_ROL = usuario.ID_ROL")
   res.render("laboral/users/add", { usuario });
 });
