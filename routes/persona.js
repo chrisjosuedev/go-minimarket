@@ -133,6 +133,8 @@ router.get("/empleados/add", async (req, res) => {
   });
 });
 
+// Listar Empleados
+
 router.post("/empleados/add", async (req, res) => {
   // Add person/Empleado
   const {
@@ -316,6 +318,19 @@ router.get("/consultas/empleadoslist", async (req, res) => {
                      INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
                      WHERE (persona.ID_PERSONA IN (SELECT empleado.ID_PERSONA FROM empleado));`
   const emp = await pool.query(empQuery);
+  const jsonEmp = Object.values(JSON.parse(JSON.stringify(emp)));
+  res.json(jsonEmp);
+})
+
+// No Empleado Seguridad
+router.get("/consultas/empleados/:id", async (req, res) => {
+  const { id } = req.params;
+  const queryEmp = `SELECT empleado.*, 
+                    concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as NOMBRE_EMPLEADO
+                    FROM empleado
+                    INNER JOIN persona ON persona.ID_PERSONA = empleado.ID_PERSONA
+                    WHERE empleado.ID_PERSONA = ?`
+  const emp = await pool.query(queryEmp, [id]);
   const jsonEmp = Object.values(JSON.parse(JSON.stringify(emp)));
   res.json(jsonEmp);
 })

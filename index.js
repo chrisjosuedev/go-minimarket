@@ -5,10 +5,13 @@ const path = require('path')
 const flash = require('connect-flash')
 const sessions = require('express-session')
 const MySqlStore = require('express-mysql-session')
-//const passport = require('passport');
+const passport = require('passport');
 
 // Base de Datos
 const { database } = require('./keys')
+
+// Init
+require('./lib/passport');
 
 // Configuracion de Puerto
 const app = express()
@@ -38,12 +41,15 @@ app.use(flash())
 app.use(morgan('dev'))
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Variables Globales
 app.use((req, res, next) => {
     app.locals.success = req.flash('success')
     app.locals.message = req.flash('message')
     app.locals.invoice = req.flash('invoice')
+    app.locals.user = req.user
     next();
 });
 
@@ -54,6 +60,7 @@ app.use('/persona', require('./routes/persona'))
 app.use('/laboral', require('./routes/laboral'))
 app.use('/facturacion', require('./routes/facturacion'))
 app.use('/analiticas', require('./routes/analiticas'))
+app.use(require('./routes/authentication'));
 
 // Public
 app.use(express.static(path.join(__dirname, 'public')));

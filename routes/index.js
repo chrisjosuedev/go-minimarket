@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 // Home
-router.get('/', (req, res) => {
+router.get('/home', (req, res) => {
     res.render('home/homepage')
 })
 

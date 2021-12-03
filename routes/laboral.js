@@ -67,11 +67,9 @@ router.get("/categorias/delete/:id_categoria", async (req, res) => {
 // USUARIOS
 
 // -> /users/usuarios
-router.get("/users/add", async (req, res) => {
+router.get("/users", async (req, res) => {
   const usuario = await pool.query("SELECT usuario.USERNAME, rol_users.DESC_ROL FROM usuario INNER JOIN rol_users ON rol_users.ID_ROL = usuario.ID_ROL")
-  const roles = await pool.query("SELECT * FROM rol_users");
-  const empleados = await pool.query("SELECT ID_EMPLEADO, ID_CATEGORIA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA FROM empleado INNER JOIN persona ON empleado.ID_PERSONA = persona.ID_PERSONA HAVING ID_CATEGORIA != 2")
-  res.render("laboral/users/add", { roles, empleados, usuario });
+  res.render("laboral/users/add", { usuario });
 });
 
 router.post("/users/add", async (req, res) => {
@@ -90,7 +88,7 @@ router.post("/users/add", async (req, res) => {
     newUser,
   ]);
   req.flash('success', 'Usuario guardado correctamente');
-  res.redirect("/laboral/users/add");
+  res.redirect("/laboral/users");
 });
 
 // Editar

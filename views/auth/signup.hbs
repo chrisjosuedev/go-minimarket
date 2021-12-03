@@ -1,0 +1,104 @@
+<div class="col-md-4 mx-auto mt-4">
+    <div class="alert alert-danger d-none" role="alert" id="alert">
+        A simple danger alert—check it out!
+    </div>
+    <div class="card mt-4">
+        <div class="card-header font-weight-bold">
+            <i class="fas fa-user"></i> Registrar
+        </div>
+        <div class="card-body">
+            <form action="/laboral/users/add" method="POST">
+
+                <div class="form-row">
+                    <div class="form-group col-md-8">
+                        <input type="text" id="idEmp" class="form-control" placeholder="DNI Empleado"
+                            autofocus required>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="bEmp" class="btn btn-success" style="width: 121px;">
+                            <i class=" fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="codEmp" class="form-control" name="id_empleado" hidden>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <input type="text" id="nameEmp" class="form-control" name="name_emp"
+                            placeholder="Nombre Empleado" disabled>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-control" name="username" placeholder="Username" autofocus required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="form-group">
+                    <select id="inputState sel-tipo" name="id_rol" class="custom-select">
+                        <option selected> - Seleccionar rol - </option>
+                        {{> options/select-roles }}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-success float-right">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    const noRows = $('#alert')
+    const bEmp = $("#bEmp")
+    const idEmp = $("#idEmp")
+
+    const idNameEmp = $("#nameEmp")
+    const idCodEmp = $("#codEmp")
+
+    // Añadir en consulta, la verificacion de que si el empleado ya tiene un usuario.
+    bEmp.on('click', function () {
+        var id = idEmp.val()
+        $.ajax({
+            url: "/persona/consultas/empleados/" + id,
+            success: function (empleado) {
+                if (empleado.length === 0) {
+                    noRows.text("Empleado no existe, ingrese el DNI correctamente.")
+                    noRows.removeClass('d-none')
+
+                    setTimeout(function () {
+                        noRows.addClass('d-none')
+                    }, 5000);
+                }
+                else {
+                    if (empleado[0].ID_CATEGORIA === 2) {
+                        noRows.text("ADVERTENCIA: Al personal de seguridad no puede asignarsele un usuario, por favor intente con otro empleado.")
+                        noRows.removeClass('d-none')
+
+                        setTimeout(function () {
+                            noRows.addClass('d-none')
+                        }, 7000);
+                    }
+                    else {
+                        idNameEmp.val(empleado[0].NOMBRE_EMPLEADO)
+                        idCodEmp.val(empleado[0].ID_EMPLEADO)
+                    }
+                }
+
+            }
+        })
+    });
+
+
+
+</script>
