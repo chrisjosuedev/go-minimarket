@@ -1,6 +1,6 @@
 <div class="container p-4">
     <div class="row">
-        <div class="col-md-8 mx-auto">
+        <div class="col-md-8 d-none mx-auto" id="add-item">
             <div class="card">
                 <div class="card-header font-weight-bold">
                     Agregar Ítem
@@ -54,7 +54,7 @@
                     Opciones
                 </div> 
                 <div class="card-body text-center">
-                    <a href="/" class="btn btn-primary btn-block">
+                    <a href="/home" class="btn btn-primary btn-block">
                         <i class="fas fa-home"></i> Home
                     </a>
                     <a href="/productos/informe-general" class="btn btn-danger btn-block mt-2">
@@ -74,3 +74,24 @@
     </div>
 
 </div>
+
+
+<!-- Scripts -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    const add_item = $('#add-item')
+
+    // ID PRIVILEGIO
+    var tipoPrivilegio = `{{user.ID_ROL}}`
+
+    // DISEÑADOR
+    if (tipoPrivilegio === '7') {
+        console.log("Diseñador")
+    }
+    else if (tipoPrivilegio === '3') {
+        add_item.removeClass('d-none');
+    }
+
+</script>

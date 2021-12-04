@@ -43,7 +43,7 @@
                 <a href="/persona/clientes/edit/{{ID_PERSONA}}" class="btn btn-primary">
                     <i class="fas fa-pen"></i>
                 </a>
-                <a href="/persona/clientes/delete/{{ID_PERSONA}}" class="btn btn-danger">
+                <a href="/persona/clientes/delete/{{ID_PERSONA}}" class="btn btn-danger del-cliente">
                     <i class="fa fa-trash"></i>
                 </a>
             </td>
@@ -57,3 +57,22 @@
     {{/each}}
     </tbody>
 </table>
+
+<!-- Scripts -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    const del_cliente = $('.del-cliente')
+
+    // ID PRIVILEGIO
+    var tipoPrivilegio = `{{user.ID_ROL}}`
+
+    // DISEÑADOR
+    if (tipoPrivilegio === '7') {
+        del_cliente.each(function (e) {
+            $(this).addClass('disabled')
+        })
+    }
+
+</script>

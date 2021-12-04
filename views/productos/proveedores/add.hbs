@@ -1,6 +1,6 @@
 <div class="container p-4">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4 d-none" id="add-proveedor">
             <div class="card">
                 <div class="card-header font-weight-bold">
                     Agregar proveedor
@@ -31,8 +31,30 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8 mx-auto" id="list-proveedores">
             {{> list-proveedores }}
         </div>
     </div>
 </div>
+
+<!-- Scripts -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    const add_proveedor = $('#add-proveedor')
+    const list_proveedor = $('#list-proveedores')
+
+    // ID PRIVILEGIO
+    var tipoPrivilegio = `{{user.ID_ROL}}`
+
+    // DISEÑADOR
+    if (tipoPrivilegio === '7') {
+        console.log("Diseñador")
+    }
+    else if (tipoPrivilegio === '3') {
+        add_proveedor.removeClass('d-none');
+        list_proveedor.removeClass('mx-auto')
+    }
+
+</script>

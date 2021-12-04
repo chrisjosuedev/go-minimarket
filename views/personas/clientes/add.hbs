@@ -1,6 +1,6 @@
 <div class="container p-4">
     <div class="row">
-        <div class="col-md-8 mx-auto">
+        <div class="col-md-8 mx-auto d-none" id="add-cliente">
             <div class="card">
                 <div class="card-header font-weight-bold">
                     Agregar Clientes
@@ -83,3 +83,21 @@
     </div>
 </div>
 {{> options/dynamic-select }}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    const add_cliente = $('#add-cliente')
+
+    // ID PRIVILEGIO
+    var tipoPrivilegio = `{{user.ID_ROL}}`
+
+    // DISEÑADOR
+    if (tipoPrivilegio === '7') {
+        console.log("Diseñador")
+    }
+    else if (tipoPrivilegio === '3' || tipoPrivilegio === '5' || tipoPrivilegio === '4') {
+        add_cliente.removeClass('d-none');
+    }
+
+</script>

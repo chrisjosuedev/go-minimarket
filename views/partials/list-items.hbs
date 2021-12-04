@@ -32,10 +32,10 @@
                 {{NOMBRE_MARCA}}
             </td>
             <td class="text-right">
-                <a href="/productos/edit/{{ID_PRODUCTOS}}" class="btn btn-primary">
+                <a href="/productos/edit/{{ID_PRODUCTOS}}" class="btn btn-primary edit-item">
                     <i class="fas fa-pen"></i>
                 </a>
-                <a href="/productos/delete/{{ID_PRODUCTOS}}" class="btn btn-danger">
+                <a href="/productos/delete/{{ID_PRODUCTOS}}" class="btn btn-danger del-item">
                     <i class="fa fa-trash"></i>
                 </a>
             </td>
@@ -49,3 +49,28 @@
         {{/each}}
     </tbody>
 </table>
+
+
+<!-- Scripts -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    const del_item = $('.del-item')
+    const edit_item = $('.edit-item')
+
+    // ID PRIVILEGIO
+    var tipoPrivilegio = `{{user.ID_ROL}}`
+
+    // DISEÑADOR
+    if (tipoPrivilegio === '7') {
+        del_item.each(function (e) {
+            $(this).addClass('disabled')
+        })
+
+        edit_item.each(function (e) {
+            $(this).addClass('disabled')
+        })
+    }
+
+</script>

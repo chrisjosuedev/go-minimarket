@@ -16,8 +16,7 @@
 
 
             <div class="text-right">
-                <a href="/productos/proveedores/delete/{{ID_PROVEEDOR}}" class="btn btn-danger btn-sm"> Eliminar </a>
-                <a href="/productos/proveedores/edit/{{ID_PROVEEDOR}}" class="btn btn-secondary btn-sm"> Editar </a>
+                <a href="/productos/proveedores/edit/{{ID_PROVEEDOR}}" class="btn btn-secondary btn-sm edit-pro"> Editar </a>
             </div>
         </div>
 
@@ -32,3 +31,22 @@
     </div>
 </div>
 {{/each}}
+
+<!-- Scripts -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    const edit_proveedor = $('.edit-pro')
+
+    // ID PRIVILEGIO
+    var tipoPrivilegio = `{{user.ID_ROL}}`
+
+    // DISEÑADOR
+    if (tipoPrivilegio === '7') {
+        edit_proveedor.each(function (e) {
+            $(this).addClass('disabled')
+        })
+    }
+
+</script>

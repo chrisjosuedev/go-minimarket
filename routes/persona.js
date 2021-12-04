@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../database");
-const { isLoggedIn } = require('../lib/auth')
+const { isLoggedIn } = require("../lib/auth");
 // Generacion de PDF
 
 const PDF = require("pdfkit-construct");
 
 // Generacion Informe Simple PDF
 router.get("/informe-general-empleados", async (req, res) => {
-
   // Generacion PDF
   const doc = new PDF({ bufferPages: true });
 
@@ -27,24 +26,28 @@ router.get("/informe-general-empleados", async (req, res) => {
   });
 
   // Header
-  doc.setDocumentHeader({
-    height: '12'
-  }, () => {
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(18)
-      .text("LISTADO GENERAL DE EMPLEADOS", {align: 'center'});
+  doc.setDocumentHeader(
+    {
+      height: "12",
+    },
+    () => {
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(18)
+        .text("LISTADO GENERAL DE EMPLEADOS", { align: "center" });
 
-
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(16)
-      .text("Go! Store", {
-        align: 'left',
-      }, doc.header.y + 8)
-  
-
-    });
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(16)
+        .text(
+          "Go! Store",
+          {
+            align: "left",
+          },
+          doc.header.y + 8
+        );
+    }
+  );
 
   // Query de Empleados
   const empleadosQuery = `SELECT persona.ID_PERSONA, 
@@ -63,8 +66,7 @@ router.get("/informe-general-empleados", async (req, res) => {
 
   const empleados = await pool.query(empleadosQuery);
 
-  const employee = empleados.map( (emp) => {
-
+  const employee = empleados.map((emp) => {
     const item = {
       id: emp.ID_PERSONA,
       name: emp.NOMBRE,
@@ -72,12 +74,12 @@ router.get("/informe-general-empleados", async (req, res) => {
       contratacion: emp.CONTRATO,
       puesto: emp.DESCRIPCION_CATEGORIA,
       salario: emp.SALARIO,
-      residencia: emp.RESIDENCIA
-    }
+      residencia: emp.RESIDENCIA,
+    };
 
-    return item
-  }) 
- 
+    return item;
+  });
+
   doc.addTable(
     [
       { key: "id", label: "ID", align: "left" },
@@ -90,17 +92,16 @@ router.get("/informe-general-empleados", async (req, res) => {
     ],
     employee,
     {
-      
       border: null,
       width: "fill_body",
       striped: true,
-      headBackground : '#23282A',
-      headColor : '#FFFFFF',
-      headFont : "Helvetica-Bold",
-      headFontSize : 9,
+      headBackground: "#23282A",
+      headColor: "#FFFFFF",
+      headFont: "Helvetica-Bold",
+      headFontSize: 9,
       stripedColors: ["#FFFFFF", "#B2CBD3"],
-      cellsFont : "Helvetica",
-      cellsFontSize : 9,
+      cellsFont: "Helvetica",
+      cellsFontSize: 9,
       headAlign: "center",
     }
   );
@@ -241,9 +242,11 @@ router.get("/empleados/delete/:id_persona", async (req, res) => {
 
 router.get("/clientes/add", isLoggedIn, async (req, res) => {
   const clienteQuery = `SELECT persona.ID_PERSONA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO
-                        FROM persona 
+                        FROM persona
+                        left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA 
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
-                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO`
+                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
+                        WHERE (persona.ID_PERSONA NOT IN (SELECT empleado.ID_PERSONA FROM empleado));`;
   const cliente = await pool.query(clienteQuery);
   const ciudad = await pool.query("SELECT * FROM ciudad");
   const departamentos = await pool.query("SELECT * FROM departamentos");
@@ -258,7 +261,7 @@ router.get("/consultas", isLoggedIn, async (req, res) => {
                         from persona
                         left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
-                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO;`
+                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO;`;
   const persona = await pool.query(personaQuery);
   res.render("personas/list", { persona });
 });
@@ -271,14 +274,13 @@ router.get("/consultas/general", async (req, res) => {
                         from persona
                         left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
-                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO;`
+                        INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO;`;
   const persona = await pool.query(personaQuery);
   const jsonPersona = Object.values(JSON.parse(JSON.stringify(persona)));
   res.json(jsonPersona);
 });
 
-
-// JSON Clientes 
+// JSON Clientes
 router.get("/consultas/clientes", async (req, res) => {
   const clienteQuery = `select persona.ID_PERSONA, persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
                         	persona.CELULAR, persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO, 
@@ -287,11 +289,11 @@ router.get("/consultas/clientes", async (req, res) => {
                         left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
                         INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
-                        HAVING TIPO = true;`
+                        HAVING TIPO = true;`;
   const cliente = await pool.query(clienteQuery);
   const jsonClientes = Object.values(JSON.parse(JSON.stringify(cliente)));
   res.json(jsonClientes);
-})
+});
 
 // JSON Solo Clientes
 router.get("/consultas/clienteslist", async (req, res) => {
@@ -301,11 +303,11 @@ router.get("/consultas/clienteslist", async (req, res) => {
                         left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
                         INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
-                        WHERE (persona.ID_PERSONA NOT IN (SELECT empleado.ID_PERSONA FROM empleado));`
+                        WHERE (persona.ID_PERSONA NOT IN (SELECT empleado.ID_PERSONA FROM empleado));`;
   const cliente = await pool.query(clienteQuery);
   const jsonClientes = Object.values(JSON.parse(JSON.stringify(cliente)));
   res.json(jsonClientes);
-})
+});
 
 // JSON Solo Empleados
 router.get("/consultas/empleadoslist", async (req, res) => {
@@ -316,11 +318,11 @@ router.get("/consultas/empleadoslist", async (req, res) => {
                      INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
                      INNER JOIN categoria_laboral on empleado.ID_CATEGORIA = categoria_laboral.ID_CATEGORIA
                      INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
-                     WHERE (persona.ID_PERSONA IN (SELECT empleado.ID_PERSONA FROM empleado));`
+                     WHERE (persona.ID_PERSONA IN (SELECT empleado.ID_PERSONA FROM empleado));`;
   const emp = await pool.query(empQuery);
   const jsonEmp = Object.values(JSON.parse(JSON.stringify(emp)));
   res.json(jsonEmp);
-})
+});
 
 // No Empleado Seguridad
 router.get("/consultas/empleados/:id", async (req, res) => {
@@ -329,29 +331,32 @@ router.get("/consultas/empleados/:id", async (req, res) => {
                     concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as NOMBRE_EMPLEADO
                     FROM empleado
                     INNER JOIN persona ON persona.ID_PERSONA = empleado.ID_PERSONA
-                    WHERE empleado.ID_PERSONA = ?`
+                    WHERE empleado.ID_PERSONA = ?`;
   const emp = await pool.query(queryEmp, [id]);
   const jsonEmp = Object.values(JSON.parse(JSON.stringify(emp)));
   res.json(jsonEmp);
-})
+});
 
 // JSON persona String
 router.get("/consultas/:name", async (req, res) => {
   const { name } = req.params;
-  const like = " LIKE '%"
-  const personaQuery = `SELECT persona.ID_PERSONA, concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as Nombre, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
+  const like = " LIKE '%";
+  const personaQuery =
+    `SELECT persona.ID_PERSONA, concat_ws(' ', persona.NOMBRE_PERSONA, persona.APELLIDO_PERSONA) as Nombre, (if(persona.SEXO = 1, 'F', 'M')) as SEXO, 
                         	persona.CELULAR, upper(concat_ws(', ', persona.DIRECCION_RESIDENCIA, ciudad.NOMBRE_CIUDAD, departamentos.NOMBRE_DEPTO)) as Residencia, 
                             case when empleado.ID_PERSONA is null then 'CLIENTE' else 'EMPLEADO' end as TIPO
                         from persona
                         left join empleado on persona.ID_PERSONA = empleado.ID_PERSONA
                         INNER JOIN ciudad on persona.ID_CIUDAD = ciudad.ID_CIUDAD and ciudad.ID_DEPTO = persona.ID_DEPTO
                         INNER JOIN departamentos on persona.ID_DEPTO = departamentos.ID_DEPTO
-                        WHERE persona.NOMBRE_PERSONA` + like + name + "%'"
+                        WHERE persona.NOMBRE_PERSONA` +
+    like +
+    name +
+    "%'";
   const persona = await pool.query(personaQuery);
   const jsonPersona = Object.values(JSON.parse(JSON.stringify(persona)));
   res.json(jsonPersona);
 });
-
 
 // JSON Empleados Listado General
 router.get("/empleados", async (req, res) => {
@@ -365,7 +370,6 @@ router.get("/empleados", async (req, res) => {
   const jsonEmpelados = Object.values(JSON.parse(JSON.stringify(empleados)));
   res.json(jsonEmpelados);
 });
-
 
 router.post("/clientes/add", async (req, res) => {
   // Add person
