@@ -1,2 +1,5 @@
 # go-minimarket
-Sistema básico de gestión de Tienda de Conveniencia desarrollado en Node.js y MySQL, practica y ejecucion de DOM por JS y JQuery.
+
+Convenience Store Software developed with Node.js & MySQL
+
+
