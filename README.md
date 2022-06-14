@@ -11,3 +11,4 @@ Go Store is a CRM Application focused on convenience stores to improve sales flo
 - password: temp
 
 
+⌛️ Important: This is a version for demonstration purposes.
